@@ -6,3 +6,7 @@ module com.example.library {
     opens com.example.library to javafx.fxml;
     exports com.example.library;
 }
+
+/*
+*  I love Pritom and will feed him doi from dokan (matir doi)
+* */
