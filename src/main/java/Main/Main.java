@@ -150,14 +150,13 @@ public class Main {
                                    case 3:{
                                        System.out.println("Enter bookId: ");
                                        String bookId = sc.nextLine();
-                                       serve.requestBorrowedBook(member, bookId);
-
+                                       serve.requestBorrowedBook(current_librarian, member, bookId);
                                        break;
                                    }
                                    case 4:{
                                        System.out.println("Enter bookId: ");
                                        String bookId = sc.nextLine();
-                                       serve.returnBorrowedBook(member, bookId);
+                                       serve.returnBorrowedBook(current_librarian, member, bookId);
                                        break;
                                    }
                                }
@@ -176,6 +175,88 @@ public class Main {
                    break;
                }
                case 3:{
+                   String userId;
+                   String password;
+                   System.out.print("USER ID: ");
+                   userId = sc.nextLine();
+//                   Member member = serve.isMemberFound(userId);
+                   if(current_librarian.getUserId().equals(userId)){
+                       System.out.print("PASSWORD: ");
+                       password = sc.nextLine();
+                       if(current_librarian.getPassword().equals(password)){
+                           System.out.println("logged in as librarian");
+
+                           int librarian_choice = 0;
+                           while(librarian_choice != 4){
+                               System.out.println("Enter 1 for viewing all books");
+                               System.out.println("Enter 2 for showing pending issuing books");
+                               System.out.println("Enter 3 to showing pending returning books");
+                               System.out.println("Enter 4 for logOut");
+                               librarian_choice = sc.nextInt();
+                               sc.nextLine();
+                               switch (librarian_choice){
+                                   case 1 : {
+                                       serve.showAllBooks();
+                                       break;
+                                   }
+                                   case 2:{
+                                       current_librarian.showPendingBooks(serve);
+                                       int addChoice = 0;
+                                       while(addChoice != 2){
+                                           System.out.println("Enter 1 for approve pending issuing books");
+                                           System.out.println("Enter 2 to quit");
+                                           addChoice = sc.nextInt();
+                                           sc.nextLine();
+                                           switch (addChoice){
+                                               case 1:{
+                                                   System.out.print("Enter member userId: ");
+                                                   String memberUserId = sc.nextLine();
+                                                   System.out.print("Enter bookId: ");
+                                                   String bookId = sc.nextLine();
+                                                   current_librarian.approveBook(serve, memberUserId, bookId);
+                                                   break;
+                                               }
+                                           }
+
+                                       }
+                                       break;
+                                   }
+                                   case 3:{
+                                       current_librarian.showPendingReturnBook(serve);
+                                       int addChoice = 0;
+                                       while(addChoice != 2){
+                                           System.out.println("Enter 1 for accepting returned books");
+                                           System.out.println("Enter 2 to quit");
+                                           addChoice = sc.nextInt();
+                                           sc.nextLine();
+                                           switch (addChoice){
+                                               case 1:{
+                                                   System.out.print("Enter member userId: ");
+                                                   String memberUserId = sc.nextLine();
+                                                   System.out.print("Enter bookId: ");
+                                                   String bookId = sc.nextLine();
+                                                   current_librarian.acceptBook(serve, memberUserId, bookId);
+                                                   break;
+                                               }
+                                           }
+
+                                       }
+                                       break;
+                                   }
+                                   case 4:{
+
+                                       break;
+                                   }
+                               }
+                           }
+                       }
+                       else{
+                           System.out.println("Wrong password!! Try again");
+                       }
+                   }
+                   else{
+                       System.out.println("UserId not found! Create new Account");
+                   }
                    break;
                }
                case 4:{

@@ -34,12 +34,6 @@ public class service {
         }
         return null;
     }
-//    public boolean isMemberPasswordMatched(String password){
-//        for(var member: allMembers){
-//            if(member.getPassword() == password) return true;
-//        }
-//        return false;
-//    }
     public void printMember(){
         for(var x: allMembers){
             System.out.println(x);
@@ -68,51 +62,12 @@ public class service {
         }
         return null;
     }
-    public void requestBorrowedBook(Member member, String bookId) throws IOException {
-        member.addBorrowedBook(findBook(bookId));
-        String filePath = "src\\main\\java\\Main\\memberInformation.txt";
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
-        boolean found = false;
-        for (int i = 0; i < lines.size(); i++){
-            if(lines.get(i).contains("|" + member.getUserId()+"|")){
-                found = true;
-                String[] parts = lines.get(i).split("\\|");
-                String[] books = parts[4].split(",");
-
-                List<String> bookList = new ArrayList<>(Arrays.asList(books));
-                String updatedBooks = String.join(",", bookList);
-                if (!bookId.isEmpty()) {
-                    updatedBooks += (updatedBooks.isEmpty() ? "" : ",") + bookId;
-                }
-                parts[4] = updatedBooks;
-                lines.set(i, String.join("|", parts));
-                break;
-            }
-        }
-        Files.write(Paths.get(filePath), lines);
+    public void requestBorrowedBook(Librarian current_librarian, Member member, String bookId){
+        current_librarian.addPendingIssuingBook(member, bookId);
     }
 
-    public void returnBorrowedBook(Member member, String bookId) throws IOException {
-        member.addBorrowedBook(findBook(bookId));
-        String filePath = "src\\main\\java\\Main\\memberInformation.txt";
-        List<String> lines = Files.readAllLines(Paths.get(filePath));
-        boolean found = false;
-        for (int i = 0; i < lines.size(); i++){
-            if(lines.get(i).contains("|" + member.getUserId()+"|")){
-                found = true;
-                String[] parts = lines.get(i).split("\\|");
-                String[] books = parts[4].split(",");
-
-                List<String> bookList = new ArrayList<>(Arrays.asList(books));
-                bookList.remove(bookId);
-                String updatedBooks = String.join(",", bookList);
-                parts[4] = updatedBooks;
-                lines.set(i, String.join("|", parts));
-                break;
-            }
-        }
-        Files.write(Paths.get(filePath), lines);
+    public void returnBorrowedBook(Librarian current_librarian, Member member, String bookId) throws IOException {
+        current_librarian.addRetunedBook(member, bookId);
     }
-
 
 }
