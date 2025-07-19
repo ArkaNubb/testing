@@ -25,7 +25,4 @@ public class MemberService {
         book.setRating(rating);
     }
 
-
-
-
 }

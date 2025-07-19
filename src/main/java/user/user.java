@@ -14,5 +14,21 @@ public abstract class user {
 
     }
 // I am Pritom
-    abstract public void printInfo();
+
+    @Override
+    public String toString() {
+        return email + "|" + userId + "|" + name;
+    }
+    public String getUserId(){
+        return userId;
+    }
+    public String getPassword(){
+        return password;
+    }
+    public String getEmail(){
+        return email;
+    }
+    public String getName(){
+        return name;
+    }
 }
