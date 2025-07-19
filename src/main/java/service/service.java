@@ -6,6 +6,10 @@ import user.Librarian;
 import user.Member;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class service {
@@ -14,12 +18,16 @@ public class service {
     protected List<Author>allAuthors;
     protected Librarian current_librarian;
 
-    public service(Librarian current_librarian, List<Author> allAuthors, List<Member> allMembers, List<Book> allBooks) {
+    public service(Librarian current_librarian, List<Author> allAuthors, List<Book> allBooks) {
         this.current_librarian = current_librarian;
         this.allAuthors = allAuthors;
-        this.allMembers = allMembers;
+//        this.allMembers = allMembers;
         this.allBooks = allBooks;
     }
+    public void addMembers(List<Member>allMembers){
+        this.allMembers = allMembers;
+    }
+
     public Member isMemberFound(String userId){
         for(var member: allMembers){
             if(member.getUserId().equals(userId)) return member;
@@ -50,8 +58,61 @@ public class service {
     public void addMember(Member member) throws IOException {
         allMembers.add(member);
         BufferedWriter memberInformation = new BufferedWriter(new FileWriter("D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt", true));
-        memberInformation.write("\n" + member.getEmail() + "|" + member.getUserId() + "|" + member.getPassword() + "|" + member.getName());
+        memberInformation.write("\n" + member.getEmail() + "|" + member.getUserId() + "|" + member.getPassword() + "|" + member.getName() + "|" + "dummybook");
         memberInformation.close();
     }
+    public Book findBook(String bookId){
+        for(var x: allBooks){
+//            if(x.equals("dummybook")) continue;
+            if(x.getBookId().equals(bookId)) return x;
+        }
+        return null;
+    }
+    public void requestBorrowedBook(Member member, String bookId) throws IOException {
+        member.addBorrowedBook(findBook(bookId));
+        String filePath = "D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt";
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        boolean found = false;
+        for (int i = 0; i < lines.size(); i++){
+            if(lines.get(i).contains("|" + member.getUserId()+"|")){
+                found = true;
+                String[] parts = lines.get(i).split("\\|");
+                String[] books = parts[4].split(",");
+
+                List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                String updatedBooks = String.join(",", bookList);
+                if (!bookId.isEmpty()) {
+                    updatedBooks += (updatedBooks.isEmpty() ? "" : ",") + bookId;
+                }
+                parts[4] = updatedBooks;
+                lines.set(i, String.join("|", parts));
+                break;
+            }
+        }
+        Files.write(Paths.get(filePath), lines);
+    }
+
+    public void returnBorrowedBook(Member member, String bookId) throws IOException {
+        member.addBorrowedBook(findBook(bookId));
+        String filePath = "D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt";
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        boolean found = false;
+        for (int i = 0; i < lines.size(); i++){
+            if(lines.get(i).contains("|" + member.getUserId()+"|")){
+                found = true;
+                String[] parts = lines.get(i).split("\\|");
+                String[] books = parts[4].split(",");
+
+                List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                bookList.remove(bookId);
+                String updatedBooks = String.join(",", bookList);
+                parts[4] = updatedBooks;
+                lines.set(i, String.join("|", parts));
+                break;
+            }
+        }
+        Files.write(Paths.get(filePath), lines);
+    }
+
 
 }

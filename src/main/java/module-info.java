@@ -3,8 +3,8 @@ module com.example.library {
     requires javafx.fxml;
 
 
-    opens com.example.library to javafx.fxml;
-    exports com.example.library;
+    opens Main to javafx.fxml;
+    exports Main;
 }
 
 /*

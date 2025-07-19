@@ -11,8 +11,9 @@ public class Book {
     private List<String>genre;
     private List<Double> ratings;
 
-    public Book(String name, String publishedDate, String authorName, List<String> genre, List<Double>ratings) {
+    public Book(String name, String bookId, String publishedDate, String authorName, List<String> genre, List<Double>ratings) {
         this.name = name;
+        this.bookId = bookId;
         this.publishedDate = publishedDate;
         AuthorName = authorName;
         this.genre = genre;
@@ -58,4 +59,8 @@ public class Book {
                 ", ratings=" + ratings +
                 '}';
     }
+    public String getBookId(){
+        return bookId;
+    }
+
 }

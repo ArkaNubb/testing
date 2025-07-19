@@ -12,8 +12,9 @@ public class Member extends user {
     private final int maxBooks=5;
     private int currentBooks;
 
-    public Member(String email, String userId, String password, String name) {
+    public Member(String email, String userId, String password, String name, List<Book>borrowedBooks) {
         super(email, userId, password, name);
+        this.borrowedBooks = borrowedBooks;
         currentBooks=0;
     }
 
@@ -39,6 +40,10 @@ public class Member extends user {
         }
         return new Book();
     }
-
+    public void showAllBorrowedBooks(){
+        for(var x: borrowedBooks){
+            System.out.println(x);
+        }
+    }
 
 }
