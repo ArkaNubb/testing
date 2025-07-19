@@ -16,4 +16,10 @@ public class service {
     protected List<Author>allAuthors;
     protected Librarian current_librarian;
 
+    public service(Librarian current_librarian, List<Author> allAuthors, List<Member> allMembers, List<Book> allBooks) {
+        this.current_librarian = current_librarian;
+        this.allAuthors = allAuthors;
+        this.allMembers = allMembers;
+        this.allBooks = allBooks;
+    }
 }
