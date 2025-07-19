@@ -13,13 +13,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class service {
-    protected List<Book>allBooks;
-    protected List<Member>allMembers;
+    protected static List<Book>allBooks;
+    protected static List<Member>allMembers;
     protected List<Author>allAuthors;
     protected Librarian current_librarian;
 
-    public service(Librarian current_librarian, List<Author> allAuthors, List<Book> allBooks) {
-        this.current_librarian = current_librarian;
+    public service(List<Author> allAuthors, List<Book> allBooks) {
         this.allAuthors = allAuthors;
 //        this.allMembers = allMembers;
         this.allBooks = allBooks;
@@ -27,8 +26,12 @@ public class service {
     public void addMembers(List<Member>allMembers){
         this.allMembers = allMembers;
     }
+    public void addLibrarian(Librarian librarian){
+        this.current_librarian = librarian;
+    }
 
-    public Member isMemberFound(String userId){
+
+    public static Member isMemberFound(String userId){
         for(var member: allMembers){
             if(member.getUserId().equals(userId)) return member;
         }
@@ -55,14 +58,14 @@ public class service {
         memberInformation.write("\n" + member.getEmail() + "|" + member.getUserId() + "|" + member.getPassword() + "|" + member.getName() + "|" + "dummybook");
         memberInformation.close();
     }
-    public Book findBook(String bookId){
+    public static Book findBook(String bookId){
         for(var x: allBooks){
 //            if(x.equals("dummybook")) continue;
             if(x.getBookId().equals(bookId)) return x;
         }
         return null;
     }
-    public void requestBorrowedBook(Librarian current_librarian, Member member, String bookId){
+    public void requestBorrowedBook(Librarian current_librarian, Member member, String bookId) throws IOException {
         current_librarian.addPendingIssuingBook(member, bookId);
     }
 

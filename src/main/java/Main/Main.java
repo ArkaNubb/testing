@@ -85,7 +85,7 @@ public class Main {
         //loading librarian;
         String [] values = librarian.split("\\|");
         Librarian current_librarian = new Librarian(values[0], values[1], values[2], values[3]);
-        service serve = new service(current_librarian, allAuthors, allBooks);
+        service serve = new service(allAuthors, allBooks);
 
         //loading members
         for (var memberInfo: memberList){
@@ -101,7 +101,7 @@ public class Main {
             allMembers.add(member);
         }
         serve.addMembers(allMembers);
-
+        serve.addLibrarian(current_librarian);
 
         Scanner sc = new Scanner(System.in);
         int choice;

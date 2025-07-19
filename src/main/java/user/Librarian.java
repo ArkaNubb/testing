@@ -3,7 +3,7 @@ package user;
 import book.Book;
 import service.service;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -14,30 +14,105 @@ public class Librarian extends user{
     public Map<Member, List<String>> pendingIssuingBook;
     public Map<Member, List<String>> pendingReturnedBook;
 
-    public Librarian(String email, String userId, String password, String name) {
+    public Librarian(String email, String userId, String password, String name) throws IOException {
         super(email, userId, password, name);
         pendingIssuingBook = new HashMap<>();
         pendingReturnedBook = new HashMap<>();
+        BufferedReader readPendingBooks =  new BufferedReader(new FileReader("src\\main\\java\\Main\\librarianPendingBooks.txt"));
+        BufferedReader readPendingReturnBooks =  new BufferedReader(new FileReader("src\\main\\java\\Main\\librarianPendingReturnBooks.txt"));
+
+        // reading pending Books
+        List<String>pendingbookList = new ArrayList<>();
+        String str;
+        while((str = readPendingBooks.readLine()) != null){
+            pendingbookList.add(str);
+        }
+        for (var x: pendingbookList){
+            String[] values = x.split("\\|");
+            Member member = service.isMemberFound(values[0]);
+            List<String> bookIds = new ArrayList<>();
+            bookIds = List.of(values[1].split(","));
+            pendingIssuingBook.put(member, bookIds);
+        }
+
+        // reading pending return books
+        List<String>pendingbookreturnList = new ArrayList<>();
+        while((str = readPendingReturnBooks.readLine()) != null){
+            pendingbookreturnList.add(str);
+        }
+        for (var x: pendingbookreturnList){
+            String[] values = x.split("\\|");
+            Member member = service.isMemberFound(values[0]);
+            List<String> bookIds = new ArrayList<>();
+            bookIds = List.of(values[1].split(","));
+            pendingReturnedBook.put(member, bookIds);
+        }
     }
-    public void addPendingIssuingBook(Member member, String bookId) {
+    public void addPendingIssuingBook(Member member, String bookId) throws IOException {
         if(pendingIssuingBook.containsKey(member)){
             pendingIssuingBook.get(member).add(bookId);
+            String filePath = "src\\main\\java\\Main\\librarianPendingBooks.txt";
+            List<String> lines = Files.readAllLines(Paths.get(filePath));
+            boolean found = false;
+            for (int i = 0; i < lines.size(); i++){
+                if(lines.get(i).contains(member.getUserId()+"|")){
+                    found = true;
+                    String[] parts = lines.get(i).split("\\|");
+                    String[] books = parts[1].split(",");
+
+                    List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                    String updatedBooks = String.join(",", bookList);
+                    if (!bookId.isEmpty()) {
+                        updatedBooks += (updatedBooks.isEmpty() ? "" : ",") + bookId;
+                    }
+                    parts[1] = updatedBooks;
+                    lines.set(i, String.join("|", parts));
+                    break;
+                }
+            }
+            Files.write(Paths.get(filePath), lines);
         }
         else{
             List<String> list = new ArrayList<>();
             list.add(bookId);
             pendingIssuingBook.put(member, list);
+            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\librarianPendingBooks.txt", true));
+            pendingInformation.write("\n" + member.getUserId() + "|" + bookId);
+            pendingInformation.close();
         }
 
     }
-    public void addRetunedBook(Member member, String bookId) {
+    public void addRetunedBook(Member member, String bookId) throws IOException {
         if(pendingReturnedBook.containsKey(member)){
             pendingReturnedBook.get(member).add(bookId);
+            String filePath = "src\\main\\java\\Main\\librarianPendingReturnBooks.txt";
+            List<String> lines = Files.readAllLines(Paths.get(filePath));
+            boolean found = false;
+            for (int i = 0; i < lines.size(); i++){
+                if(lines.get(i).contains(member.getUserId()+"|")){
+                    found = true;
+                    String[] parts = lines.get(i).split("\\|");
+                    String[] books = parts[1].split(",");
+
+                    List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                    String updatedBooks = String.join(",", bookList);
+                    if (!bookId.isEmpty()) {
+                        updatedBooks += (updatedBooks.isEmpty() ? "" : ",") + bookId;
+                    }
+                    parts[1] = updatedBooks;
+                    lines.set(i, String.join("|", parts));
+                    break;
+                }
+            }
+            Files.write(Paths.get(filePath), lines);
         }
         else{
             List<String> list = new ArrayList<>();
             list.add(bookId);
             pendingReturnedBook.put(member, list);
+            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\librarianPendingReturnBooks.txt", true));
+            pendingInformation.write("\n" + member.getUserId() + "|" + bookId);
+            pendingInformation.close();
         }
     }
     public void showPendingBooks(service serve){
@@ -95,6 +170,27 @@ public class Librarian extends user{
             }
         }
         Files.write(Paths.get(filePath), lines);
+
+        //
+
+        filePath = "src\\main\\java\\Main\\librarianPendingBooks.txt";
+        lines = Files.readAllLines(Paths.get(filePath));
+        found = false;
+        for (int i = 0; i < lines.size(); i++){
+            if(lines.get(i).contains(member.getUserId()+"|")){
+                found = true;
+                String[] parts = lines.get(i).split("\\|");
+                String[] books = parts[1].split(",");
+
+                List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                bookList.remove(bookId);
+                String updatedBooks = String.join(",", bookList);
+                parts[1] = updatedBooks;
+                lines.set(i, String.join("|", parts));
+                break;
+            }
+        }
+        Files.write(Paths.get(filePath), lines);
     }
     public void acceptBook(service serve, String memberUserId, String bookId) throws IOException{
         Member member = serve.isMemberFound(memberUserId);
@@ -112,6 +208,27 @@ public class Librarian extends user{
                 bookList.remove(bookId);
                 String updatedBooks = String.join(",", bookList);
                 parts[4] = updatedBooks;
+                lines.set(i, String.join("|", parts));
+                break;
+            }
+        }
+        Files.write(Paths.get(filePath), lines);
+
+        //
+
+        filePath = "src\\main\\java\\Main\\librarianPendingReturnBooks.txt";
+        lines = Files.readAllLines(Paths.get(filePath));
+        found = false;
+        for (int i = 0; i < lines.size(); i++){
+            if(lines.get(i).contains(member.getUserId()+"|")){
+                found = true;
+                String[] parts = lines.get(i).split("\\|");
+                String[] books = parts[1].split(",");
+
+                List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                bookList.remove(bookId);
+                String updatedBooks = String.join(",", bookList);
+                parts[1] = updatedBooks;
                 lines.set(i, String.join("|", parts));
                 break;
             }
