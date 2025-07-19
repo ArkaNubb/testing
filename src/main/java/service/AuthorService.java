@@ -23,6 +23,4 @@ public class AuthorService {
         author.removeBook(bookname);
     }
 
-
-
 }

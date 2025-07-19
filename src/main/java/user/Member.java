@@ -12,8 +12,6 @@ public class Member extends user {
     private final int maxBooks=5;
     private int currentBooks;
 
-
-
     public Member(String email, String userId, String name, String password) {
         super(email, userId, name, password);
         currentBooks=0;
