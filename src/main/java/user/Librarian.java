@@ -25,26 +25,36 @@ public class Librarian extends user{
         List<String>pendingbookList = new ArrayList<>();
         String str;
         while((str = readPendingBooks.readLine()) != null){
+            str = str.trim();
+            if(str.isEmpty()) continue;
             pendingbookList.add(str);
         }
         for (var x: pendingbookList){
             String[] values = x.split("\\|");
             Member member = service.isMemberFound(values[0]);
             List<String> bookIds = new ArrayList<>();
-            bookIds = List.of(values[1].split(","));
+            String[] vv = values[1].split(",");
+            for(var v: vv){
+                bookIds.add(v);
+            }
             pendingIssuingBook.put(member, bookIds);
         }
 
         // reading pending return books
         List<String>pendingbookreturnList = new ArrayList<>();
         while((str = readPendingReturnBooks.readLine()) != null){
+            str = str.trim();
+            if(str.isEmpty()) continue;
             pendingbookreturnList.add(str);
         }
         for (var x: pendingbookreturnList){
             String[] values = x.split("\\|");
             Member member = service.isMemberFound(values[0]);
             List<String> bookIds = new ArrayList<>();
-            bookIds = List.of(values[1].split(","));
+            String[] vv = values[1].split(",");
+            for(var v: vv){
+                bookIds.add(v);
+            }
             pendingReturnedBook.put(member, bookIds);
         }
     }
@@ -77,7 +87,7 @@ public class Librarian extends user{
             list.add(bookId);
             pendingIssuingBook.put(member, list);
             BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\librarianPendingBooks.txt", true));
-            pendingInformation.write("\n" + member.getUserId() + "|" + bookId);
+            pendingInformation.write( member.getUserId() + "|" + "dummybook," + bookId + "\n");
             pendingInformation.close();
         }
 
@@ -111,7 +121,7 @@ public class Librarian extends user{
             list.add(bookId);
             pendingReturnedBook.put(member, list);
             BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\librarianPendingReturnBooks.txt", true));
-            pendingInformation.write("\n" + member.getUserId() + "|" + bookId);
+            pendingInformation.write(member.getUserId() + "|" + "dummybook," + bookId + "\n");
             pendingInformation.close();
         }
     }
@@ -123,6 +133,7 @@ public class Librarian extends user{
             System.out.println(member.getUserId());
             System.out.println("Pending Books: ");
             for(var bookId: pendingIssuingBook.get(member)){
+                if(bookId.equals("dummybook")) continue;
                 Book book = serve.findBook(bookId);
                 System.out.print("Name: ");
                 System.out.print(book.getName());
@@ -139,6 +150,7 @@ public class Librarian extends user{
             System.out.println(member.getUserId());
             System.out.println("Pending Books: ");
             for(var bookId: pendingReturnedBook.get(member)){
+                if(bookId.equals("dummybook")) continue;
                 Book book = serve.findBook(bookId);
                 System.out.print("Name: ");
                 System.out.print(book.getName());
@@ -150,6 +162,9 @@ public class Librarian extends user{
     public void approveBook(service serve, String memberUserId, String bookId) throws IOException {
         Member member = serve.isMemberFound(memberUserId);
         member.addBorrowedBook(serve.findBook(bookId));
+
+        pendingIssuingBook.get(member).remove(bookId);
+
         String filePath = "src\\main\\java\\Main\\memberInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;
@@ -195,6 +210,7 @@ public class Librarian extends user{
     public void acceptBook(service serve, String memberUserId, String bookId) throws IOException{
         Member member = serve.isMemberFound(memberUserId);
         member.removeBook(serve.findBook(bookId));
+        pendingReturnedBook.get(member).remove(bookId);
         String filePath = "src\\main\\java\\Main\\memberInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;

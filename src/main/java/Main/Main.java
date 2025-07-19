@@ -82,9 +82,6 @@ public class Main {
             allAuthors.add(author);
         }
 
-        //loading librarian;
-        String [] values = librarian.split("\\|");
-        Librarian current_librarian = new Librarian(values[0], values[1], values[2], values[3]);
         service serve = new service(allAuthors, allBooks);
 
         //loading members
@@ -101,6 +98,10 @@ public class Main {
             allMembers.add(member);
         }
         serve.addMembers(allMembers);
+
+        //loading librarian;
+        String [] values = librarian.split("\\|");
+        Librarian current_librarian = new Librarian(values[0], values[1], values[2], values[3]);
         serve.addLibrarian(current_librarian);
 
         Scanner sc = new Scanner(System.in);
