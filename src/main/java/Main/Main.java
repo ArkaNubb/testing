@@ -21,10 +21,10 @@ public class Main {
         System.out.println("hello");
 
         // reading from file;
-        BufferedReader bookInformation = new BufferedReader(new FileReader("D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\bookInformation.txt"));
-        BufferedReader authorInformation = new BufferedReader(new FileReader("D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\authorInformation.txt"));
-        BufferedReader memberInformation = new BufferedReader(new FileReader("D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt"));
-        BufferedReader librarianInformation = new BufferedReader(new FileReader("D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\librarianInformation.txt"));
+        BufferedReader bookInformation = new BufferedReader(new FileReader("src\\main\\java\\Main\\bookInformation.txt"));
+        BufferedReader authorInformation = new BufferedReader(new FileReader("src\\main\\java\\Main\\authorInformation.txt"));
+        BufferedReader memberInformation = new BufferedReader(new FileReader("src\\main\\java\\Main\\memberInformation.txt"));
+        BufferedReader librarianInformation = new BufferedReader(new FileReader("src\\main\\java\\Main\\librarianInformation.txt"));
 
         // reading booklist;
         List<String>bookList = new ArrayList<>();

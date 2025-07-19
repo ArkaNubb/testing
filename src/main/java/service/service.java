@@ -57,7 +57,7 @@ public class service {
     }
     public void addMember(Member member) throws IOException {
         allMembers.add(member);
-        BufferedWriter memberInformation = new BufferedWriter(new FileWriter("D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt", true));
+        BufferedWriter memberInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\memberInformation.txt", true));
         memberInformation.write("\n" + member.getEmail() + "|" + member.getUserId() + "|" + member.getPassword() + "|" + member.getName() + "|" + "dummybook");
         memberInformation.close();
     }
@@ -70,7 +70,7 @@ public class service {
     }
     public void requestBorrowedBook(Member member, String bookId) throws IOException {
         member.addBorrowedBook(findBook(bookId));
-        String filePath = "D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt";
+        String filePath = "src\\main\\java\\Main\\memberInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;
         for (int i = 0; i < lines.size(); i++){
@@ -94,7 +94,7 @@ public class service {
 
     public void returnBorrowedBook(Member member, String bookId) throws IOException {
         member.addBorrowedBook(findBook(bookId));
-        String filePath = "D:\\CSE\\1-2 project\\testing\\src\\main\\java\\Main\\memberInformation.txt";
+        String filePath = "src\\main\\java\\Main\\memberInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;
         for (int i = 0; i < lines.size(); i++){
