@@ -12,15 +12,11 @@ public class Member extends user {
     private final int maxBooks=5;
     private int currentBooks;
 
-    public Member(String email, String userId, String name, String password) {
-        super(email, userId, name, password);
+    public Member(String email, String userId, String password, String name) {
+        super(email, userId, password, name);
         currentBooks=0;
     }
 
-    @Override
-    public void printInfo() {
-
-    }
 
     public int getCurrentBooks(){
         return currentBooks;
@@ -43,11 +39,6 @@ public class Member extends user {
         }
         return new Book();
     }
-
-
-
-
-
 
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Book {
     private String name;
+    private String bookId;
     private String publishedDate;
     private String AuthorName;
     private List<String>genre;
@@ -23,9 +24,7 @@ public class Book {
         this.publishedDate = publishedDate;
         AuthorName = authorName;
         this.genre = genre;
-
     }
-
 
     public Book() {
 
@@ -47,5 +46,16 @@ public class Book {
             sum += x;
         }
         return sum / ratings.size();
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "name='" + name + '\'' +
+                ", publishedDate='" + publishedDate + '\'' +
+                ", AuthorName='" + AuthorName + '\'' +
+                ", genre=" + genre +
+                ", ratings=" + ratings +
+                '}';
     }
 }

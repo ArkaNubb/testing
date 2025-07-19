@@ -9,13 +9,8 @@ public class Author extends user{
     protected List<Book> publishedBooks;
 
 
-    public Author(String email, String userId, String name, String password) {
-        super(email, userId, name, password);
-    }
-
-    @Override
-    public void printInfo() {
-
+    public Author(String email, String userId, String password, String name) {
+        super(email, userId, password, name);
     }
     public String getName(){
         return name;
