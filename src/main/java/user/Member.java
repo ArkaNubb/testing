@@ -45,5 +45,9 @@ public class Member extends user {
             System.out.println(x);
         }
     }
+    public boolean isMemberCanBorrow(){
+        if(borrowedBooks.size() < 5) return true;
+        return false;
+    }
 
 }
