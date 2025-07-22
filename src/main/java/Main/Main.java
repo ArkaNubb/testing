@@ -71,7 +71,9 @@ public class Main {
                 double d = Double.parseDouble(r.trim());
                 ratings.add(d);
             }
-            Book book = new Book(values[0], values[1], values[2], values[3], genre, ratings);
+            int total_copies = Integer.parseInt(values[6]);
+            int available_copies = Integer.parseInt(values[7]);
+            Book book = new Book(values[0], values[1], values[2], values[3], genre, ratings, total_copies, available_copies);
             allBooks.add(book);
         }
 //        System.out.println("1");
@@ -150,15 +152,20 @@ public class Main {
                                        break;
                                    }
                                    case 3:{
-                                       System.out.println("Enter bookId: ");
-                                       String bookId = sc.nextLine();
-                                       serve.requestBorrowedBook(current_librarian, member, bookId);
+                                       if(member.isMemberCanBorrow()){
+                                           System.out.println("Enter bookId: ");
+                                           String bookId = sc.nextLine();
+                                           serve.requestBorrowedBook(current_librarian, member, bookId);
+                                       }
+                                       else System.out.println("You've reached your maximum borrow limit");
                                        break;
                                    }
                                    case 4:{
                                        System.out.println("Enter bookId: ");
                                        String bookId = sc.nextLine();
-                                       serve.returnBorrowedBook(current_librarian, member, bookId);
+                                       System.out.println("Enter your rating: ");
+                                       double rating = sc.nextDouble();
+                                       serve.returnBorrowedBook(current_librarian, member, bookId, rating);
                                        break;
                                    }
                                }

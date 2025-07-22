@@ -69,8 +69,8 @@ public class service {
         current_librarian.addPendingIssuingBook(member, bookId);
     }
 
-    public void returnBorrowedBook(Librarian current_librarian, Member member, String bookId) throws IOException {
-        current_librarian.addRetunedBook(member, bookId);
+    public void returnBorrowedBook(Librarian current_librarian, Member member, String bookId, double rating) throws IOException {
+        current_librarian.addRetunedBook(member, bookId, rating);
     }
 
 }

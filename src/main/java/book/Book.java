@@ -10,14 +10,18 @@ public class Book {
     private String AuthorName;
     private List<String>genre;
     private List<Double> ratings;
+    private int total_copies;
+    private int available_copies;
 
-    public Book(String name, String bookId, String publishedDate, String authorName, List<String> genre, List<Double>ratings) {
+    public Book(String name, String bookId, String publishedDate, String authorName, List<String> genre, List<Double>ratings, int total_copies, int available_copies) {
         this.name = name;
         this.bookId = bookId;
         this.publishedDate = publishedDate;
         AuthorName = authorName;
         this.genre = genre;
         this.ratings = ratings;
+        this.total_copies = total_copies;
+        this.available_copies = available_copies;
     }
 
     public Book(String name, String publishedDate, String authorName, List<String> genre) {
@@ -51,16 +55,27 @@ public class Book {
 
     @Override
     public String toString() {
-        return "Book{" +
-                "name='" + name + '\'' +
-                ", publishedDate='" + publishedDate + '\'' +
-                ", AuthorName='" + AuthorName + '\'' +
-                ", genre=" + genre +
-                ", ratings=" + ratings +
-                '}';
+        return "Book ID: " + bookId + "\n" +
+                "-------------------------\n" +
+                "Name           : " + name + "\n" +
+                "Published Date : " + publishedDate + "\n" +
+                "Author Name    : " + AuthorName + "\n" +
+                "Genres         : " + genre + "\n" +
+                "Ratings        : " + String.format("%.2f", getRating()) + "\n" +
+                "Total Copies   : " + total_copies + "\n" +
+                "Available      : " + available_copies + "\n" +
+                "Borrowed       : " + (total_copies - available_copies) + "\n" +
+                "-------------------------";
     }
+
     public String getBookId(){
         return bookId;
     }
+    public int isAvailable(){
+        return available_copies;
+    }
 
+    public void setAvailable_copies(int available_copies) {
+        this.available_copies = available_copies;
+    }
 }
