@@ -53,6 +53,26 @@ public class Book {
         return sum / ratings.size();
     }
 
+    public String getPublishedDate() {
+        return publishedDate;
+    }
+
+    public List<String> getGenre() {
+        return genre;
+    }
+
+    public List<Double> getRatings() {
+        return ratings;
+    }
+
+    public int getAvailable_copies() {
+        return available_copies;
+    }
+
+    public int getTotal_copies() {
+        return total_copies;
+    }
+
     @Override
     public String toString() {
         return "Book ID: " + bookId + "\n" +

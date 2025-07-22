@@ -15,7 +15,7 @@ import java.util.List;
 public class service {
     protected static List<Book>allBooks;
     protected static List<Member>allMembers;
-    protected List<Author>allAuthors;
+    protected  static List<Author>allAuthors;
     protected Librarian current_librarian;
 
     public service(List<Author> allAuthors, List<Book> allBooks) {
@@ -71,6 +71,24 @@ public class service {
 
     public void returnBorrowedBook(Librarian current_librarian, Member member, String bookId, double rating) throws IOException {
         current_librarian.addRetunedBook(member, bookId, rating);
+    }
+    // Add these methods to your service.java class:
+
+    public static List<Author> getAllAuthors() {
+        return allAuthors;
+    }
+
+    public void addBookToSystem(Book book) {
+        allBooks.add(book);
+    }
+
+    public Author findAuthor(String authorId) {
+        for(Author author : allAuthors) {
+            if(author.getUserId().equals(authorId)) {
+                return author;
+            }
+        }
+        return null;
     }
 
 }

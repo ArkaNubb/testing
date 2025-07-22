@@ -5,12 +5,11 @@ import service.service;
 import user.Author;
 import user.Librarian;
 import user.Member;
+import service.AuthorService;
 
 //import java.io.*;
 //import java.security.Provider;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -181,6 +180,85 @@ public class Main {
                    break;
                }
                case 2:{
+                   String userId;
+                   String password;
+                   System.out.print("USER ID: ");
+                   userId = sc.nextLine();
+
+                   Author foundAuthor=null;
+                   for(Author author:allAuthors){
+                       if(author.getUserId().equals(userId)){
+                           foundAuthor = author;
+                           break;
+                       }
+                   }
+
+                   if(foundAuthor != null){
+                       System.out.print("PASSWORD: ");
+                       password=sc.nextLine();
+                       if(foundAuthor.getPassword().equals(password)){
+                           System.out.println("Logged in as Author: " + foundAuthor.getName());
+
+                           AuthorService authorService = new AuthorService(foundAuthor);
+
+                           int author_choice=0;
+                           while(author_choice!=4){
+                               System.out.println("Enter 1 to view your published books");
+                               System.out.println("Enter 2 to request publishing a new book");
+                               System.out.println("Enter 3 to remove a book");
+                               System.out.println("Enter 4 for logOut");
+                               author_choice = sc.nextInt();
+                               sc.nextLine();
+
+                               switch (author_choice){
+                                   case 1: {
+                                       authorService.showPublishedBooks();
+                                       break;
+                                   }
+                                   case 2: {
+                                       System.out.print("Enter book name: ");
+                                       String bookName = sc.nextLine();
+                                       System.out.print("Enter published date (dd-mm-yyyy): ");
+                                       String publishedDate = sc.nextLine();
+                                       System.out.print("Enter number of genres: ");
+                                       int numGenres = sc.nextInt();
+                                       sc.nextLine();
+
+                                       List<String> genres = new ArrayList<>();
+                                       for(int i = 0;i<numGenres; i++){
+                                           System.out.print("Enter genre "+(i+1) + ": ");
+                                           String genre = sc.nextLine().toUpperCase();
+                                           genres.add(genre);
+                                       }
+
+                                       System.out.print("Enter total number of copies: ");
+                                       int totalCopies = sc.nextInt();
+                                       sc.nextLine();
+
+                                       try {
+                                           authorService.requestPublishBook(bookName, publishedDate, genres, totalCopies, current_librarian);
+                                       } catch (IOException e) {
+                                           System.out.println("Error while requesting book publication: " + e.getMessage());
+                                       }
+                                       break;
+                                   }
+                                   case 3: {
+                                       System.out.print("Enter book name to remove: ");
+                                       String bookName = sc.nextLine();
+                                       authorService.RemoveBook(bookName);
+                                       System.out.println("Book removed from your published list.");
+                                       break;
+                                   }
+                               }
+                           }
+                       }
+                       else{
+                           System.out.println("Wrong password!! Try again");
+                       }
+                   }
+                   else{
+                       System.out.println("Author ID not found! Create new Account");
+                   }
                    break;
                }
                case 3:{
@@ -196,11 +274,12 @@ public class Main {
                            System.out.println("logged in as librarian");
 
                            int librarian_choice = 0;
-                           while(librarian_choice != 4){
+                           while(librarian_choice != 5){
                                System.out.println("Enter 1 for viewing all books");
                                System.out.println("Enter 2 for showing pending issuing books");
                                System.out.println("Enter 3 to showing pending returning books");
-                               System.out.println("Enter 4 for logOut");
+                               System.out.println("Enter 4 for showing pending book publishing requests");
+                               System.out.println("Enter 5 for logOut");
                                librarian_choice = sc.nextInt();
                                sc.nextLine();
                                switch (librarian_choice){
@@ -252,8 +331,32 @@ public class Main {
                                        }
                                        break;
                                    }
-                                   case 4:{
-
+                                   case 4: {
+                                       current_librarian.showPendingPublishRequests(serve);
+                                       int addChoice = 0;
+                                       while (addChoice != 2) {
+                                           System.out.println("Enter 1 to approve book publishing request");
+                                           System.out.println("Enter 2 to quit");
+                                           addChoice = sc.nextInt();
+                                           sc.nextLine();
+                                           switch (addChoice) {
+                                               case 1: {
+                                                   System.out.print("Enter author userId: ");
+                                                   String authorUserId = sc.nextLine();
+                                                   System.out.print("Enter bookId to approve: ");
+                                                   String bookId = sc.nextLine();
+                                                   try {
+                                                       current_librarian.approvePublishRequest(serve, authorUserId, bookId);
+                                                   } catch (IOException e) {
+                                                       System.out.println("Error approving publish request: " + e.getMessage());
+                                                   }
+                                                   break;
+                                               }
+                                           }
+                                       }
+                                       break;
+                                   }
+                                   case 5:{
                                        break;
                                    }
                                }
@@ -288,6 +391,32 @@ public class Main {
                            break;
                        }
                        case 2:{
+                           System.out.print("Enter your name: ");
+                           String name = sc.nextLine();
+                           System.out.print("Enter your email: ");
+                           String email = sc.nextLine();
+                           System.out.print("Enter your password: ");
+                           String password = sc.nextLine();
+
+                           // Generate author ID
+                           Author lastAuthor=allAuthors.get(allAuthors.size() - 1);
+                           int authorId=Integer.parseInt(lastAuthor.getUserId());
+                           String userId=String.format("%05d", authorId + 1);
+
+                           System.out.println("Your Author User Id(please remember it): " + userId);
+
+                           Author newAuthor=new Author(email, userId, password, name);
+                           allAuthors.add(newAuthor);
+
+                           // Save to file
+                           try {
+                               BufferedWriter authorinformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorInformation.txt", true));
+                               authorinformation.write("\n" + email + "|" + userId + "|" + password + "|" + name);
+                               authorinformation.close();
+                               System.out.println("Author account created ...");
+                           } catch (IOException e) {
+                               System.out.println("Error creating author account " + e.getMessage());
+                           }
                            break;
                        }
                    }
