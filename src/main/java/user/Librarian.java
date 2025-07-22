@@ -77,9 +77,9 @@ public class Librarian extends user{
                     double rating = Double.parseDouble(bookRating[1]);
                     bookPairs.add(new Pair<>(bookId, rating));
                 }
-                else{
-                    bookPairs.add(new Pair<>(v, 0.0));
-                }
+//                else{
+//                    bookPairs.add(new Pair<>(v, 0.0));
+//                }
             }
             pendingReturnedBook.put(member, bookPairs);
         }
@@ -267,7 +267,19 @@ public class Librarian extends user{
     public void acceptBook(service serve, String memberUserId, String bookId) throws IOException{
         Member member = serve.isMemberFound(memberUserId);
         member.removeBook(serve.findBook(bookId));
-        pendingReturnedBook.get(member).remove(bookId);
+
+
+        // find the rating
+        double rating=0.0;
+        Pair<String,Double> bookToRemove=null;
+        for(Pair<String, Double> bookPair : pendingReturnedBook.get(member)){
+            if(bookPair.first.equals(bookId)){
+                rating=bookPair.second;
+                bookToRemove=bookPair;
+                break;
+            }
+        }
+        if(bookToRemove!=null) pendingReturnedBook.get(member).remove(bookToRemove);
 
         //changing member information
 
@@ -302,6 +314,15 @@ public class Librarian extends user{
                 String[] parts = lines.get(i).split("\\|");
                 int availabe_copy = Integer.parseInt(parts[7]);
                 parts[7] = String.valueOf(availabe_copy + 1);
+                if(rating>0.0){
+                    String currentRatings=parts[5];
+                    if(currentRatings.isEmpty() || currentRatings.equals("dummyrating")){
+                        parts[5] = String.valueOf(rating);
+                    }
+                    else{
+                        parts[5]=currentRatings + "," + rating;
+                    }
+                }
                 lines.set(i, String.join("|", parts));
                 break;
             }
@@ -319,12 +340,23 @@ public class Librarian extends user{
                 String[] parts = lines.get(i).split("\\|");
                 String[] books = parts[1].split(",");
 
-                List<String> bookList = new ArrayList<>(Arrays.asList(books));
-                bookList.remove(bookId);
-                String updatedBooks = String.join(",", bookList);
-                parts[1] = updatedBooks;
-                if(bookList.size() == 1) lines.remove(i);
-                else lines.set(i, String.join("|", parts));
+                List<String> bookList = new ArrayList<>();
+                for(String bookEntry : books){
+                    if(!bookEntry.equals("dummybook") &&
+                            !bookEntry.startsWith(bookId + ":") &&
+                            !bookEntry.equals(bookId)){
+                        bookList.add(bookEntry);
+                    }
+                }
+
+                if(bookList.isEmpty()){
+                    lines.remove(i);
+                }
+                else{
+                    String updatedBooks = String.join(",", bookList);
+                    parts[1] = updatedBooks;
+                    lines.set(i, String.join("|", parts));
+                }
                 break;
             }
         }
