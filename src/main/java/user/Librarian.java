@@ -99,9 +99,9 @@ public class Librarian extends user{
 
         for(var x: pendingPublishList){
             String[] values = x.split("\\|");
-            // Find author by userId
+            // Ffind autho....r
             Author author = null;
-            for(Author a : service.getAllAuthors()){
+            for(Author a:service.getAllAuthors()){
                 if(a.getUserId().equals(values[0])){
                     author = a;
                     break;
@@ -109,20 +109,20 @@ public class Librarian extends user{
             }
 
             if(author != null){
-                String[] bookData = values[1].split(";");
-                List<Book> books = new ArrayList<>();
+                String[] bookData=values[1].split(";");
+                List<Book> books=new ArrayList<>();
 
                 for(String bookInfo : bookData){
                     if(bookInfo.equals("dummybook")) continue;
                     String[] bookParts = bookInfo.split(":");
-                    name = bookParts[0];
-                    String bookId = bookParts[1];
-                    String publishedDate = bookParts[2];
-                    String[] genreArray = bookParts[3].split(",");
-                    List<String> genres = Arrays.asList(genreArray);
-                    int totalCopies = Integer.parseInt(bookParts[4]);
+                    name=bookParts[0];
+                    String bookId=bookParts[1];
+                    String publishedDate=bookParts[2];
+                    String[] genreArray=bookParts[3].split(",");
+                    List<String> genres=Arrays.asList(genreArray);
+                    int totalCopies=Integer.parseInt(bookParts[4]);
 
-                    Book book = new Book(name, bookId,publishedDate,author.getName(), genres,new ArrayList<>(),totalCopies, totalCopies);
+                    Book book=new Book(name, bookId,publishedDate,author.getName(), genres,new ArrayList<>(),totalCopies, totalCopies);
                     books.add(book);
                 }
                 pendingPublishRequests.put(author, books);
@@ -319,7 +319,7 @@ public class Librarian extends user{
         // find the rating
         double rating=0.0;
         Pair<String,Double> bookToRemove=null;
-        for(Pair<String, Double> bookPair : pendingReturnedBook.get(member)){
+        for(Pair<String, Double>bookPair:pendingReturnedBook.get(member)){
             if(bookPair.first.equals(bookId)){
                 rating=bookPair.second;
                 bookToRemove=bookPair;
@@ -429,20 +429,18 @@ public class Librarian extends user{
     private void updatePendingPublishFile(Author author, Book book, boolean isNewAuthor) throws IOException {
         if(isNewAuthor){
             BufferedWriter pendingInformation=new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorPendingRequest.txt", true));
-            String bookData=book.getName() + ":" + book.getBookId()+":"+book.getPublishedDate() + ":" +
-                    String.join(",", book.getGenre())+":"+book.getTotal_copies();
+            String bookData=book.getName() + ":" + book.getBookId()+":"+book.getPublishedDate() + ":" +String.join(",", book.getGenre())+":"+book.getTotal_copies();
             pendingInformation.write(author.getUserId()+"|"+"dummybook;"+bookData+"\n");
             pendingInformation.close();
         }
         else{
-            String filePath = "src\\main\\java\\Main\\authorPendingRequest.txt";
-            List<String> lines = Files.readAllLines(Paths.get(filePath));
+            String filePath="src\\main\\java\\Main\\authorPendingRequest.txt";
+            List<String> lines=Files.readAllLines(Paths.get(filePath));
             for (int i=0;i<lines.size();i++){
                 if(lines.get(i).contains(author.getUserId() + "|")){
                     String[] parts=lines.get(i).split("\\|");
-                    String bookData=book.getName() + ":" + book.getBookId() + ":" + book.getPublishedDate() + ":" +
-                            String.join(",", book.getGenre()) + ":" + book.getTotal_copies();
-                    parts[1] = parts[1] + ";" + bookData;
+                    String bookData=book.getName() + ":" + book.getBookId() + ":"+ book.getPublishedDate()+":"+String.join(",", book.getGenre()) + ":" + book.getTotal_copies();
+                    parts[1]=parts[1] + ";" + bookData;
                     lines.set(i, String.join("|", parts));
                     break;
                 }
@@ -456,18 +454,18 @@ public class Librarian extends user{
             System.out.println("No pending publish requests.");
             return;
         }
-        for(Author author : pendingPublishRequests.keySet()){
-            System.out.print("Author Name: " + author.getName());
-            System.out.print(", Author ID: " + author.getUserId());
+        for(Author author:pendingPublishRequests.keySet()){
+            System.out.print("Author Name: " +author.getName());
+            System.out.print(", Author ID: " +author.getUserId());
             System.out.println();
             System.out.println("Pending Books for Publishing:");
 
             for(Book book:pendingPublishRequests.get(author)){
                 if(book.getName().equals("dummybook")) continue;
-                System.out.println(" Book Name: " + book.getName());
-                System.out.println(" Book ID: " + book.getBookId());
-                System.out.println(" Published Date: " + book.getPublishedDate());
-                System.out.println(" Genres: " + String.join(", ", book.getGenre()));
+                System.out.println(" Book Name: " +book.getName());
+                System.out.println(" Book ID: " +book.getBookId());
+                System.out.println(" Published Date: " +book.getPublishedDate());
+                System.out.println(" Genres: " +String.join(", ", book.getGenre()));
                 System.out.println(" Total Copies: " + book.getTotal_copies());
             }
             System.out.println();
@@ -491,8 +489,8 @@ public class Librarian extends user{
                 break;
             }
         }
-
-        if(author != null && bookToPublish!=null){
+        // baachal handling....
+        if(author!=null && bookToPublish!=null){
             serve.addBookToSystem(bookToPublish);
             author.addPublishedBooks(bookToPublish);
 
@@ -503,16 +501,16 @@ public class Librarian extends user{
             }
             // handeled book infooo
             BufferedWriter bookInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\bookInformation.txt", true));
-            String bookEntry = "\n" + bookToPublish.getName() + "|" + bookToPublish.getBookId() + "|" +
-                    bookToPublish.getPublishedDate() + "|" + bookToPublish.getAuthorName() + "|" +
-                    String.join(",", bookToPublish.getGenre()) + "|10.0|" +
-                    bookToPublish.getTotal_copies() + "|" + bookToPublish.isAvailable();
+            String bookEntry = "\n" + bookToPublish.getName()+"|"+bookToPublish.getBookId() + "|" +
+                    bookToPublish.getPublishedDate()+"|"+bookToPublish.getAuthorName() + "|" +
+                    String.join(",",bookToPublish.getGenre())+"|0.0|"+
+                    bookToPublish.getTotal_copies()+"|"+bookToPublish.isAvailable();
             bookInformation.write(bookEntry);
             bookInformation.close();
 
             updatePendingPublishRequestsFile();
             System.out.println("Book publishing request approved");
-            System.out.println("Book '" + bookToPublish.getName() + "' is now available in the library.");
+            System.out.println("Book '" + bookToPublish.getName() +" 'is now available in the library.");
         }
         else{
             System.out.println("Invalid author ID or book ID.");
