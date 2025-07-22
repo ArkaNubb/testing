@@ -76,14 +76,21 @@ public class Main {
             allBooks.add(book);
         }
 //        System.out.println("1");
+        service serve = new service(allBooks);
+
         //loading authors
+
         for (var authorInfo: authorList){
             String [] values = authorInfo.split("\\|");
-            Author author = new Author(values[0], values[1], values[2], values[3]);
+            String [] bookIds = values[4].split(",");
+            List<Book>authorPublishedBooks = new ArrayList<>();
+            for (var x: bookIds){
+                authorPublishedBooks.add(service.findBook(x));
+            }
+            Author author = new Author(values[0], values[1], values[2], values[3], authorPublishedBooks);
             allAuthors.add(author);
         }
-
-        service serve = new service(allAuthors, allBooks);
+        serve.addAuthors(allAuthors);
 
         //loading members
         for (var memberInfo: memberList){
@@ -243,9 +250,12 @@ public class Main {
                                        break;
                                    }
                                    case 3: {
-                                       System.out.print("Enter book name to remove: ");
-                                       String bookName = sc.nextLine();
-                                       authorService.RemoveBook(bookName);
+//                                       System.out.print("Enter book name to remove: ");
+//                                       authorService.RemoveBook(bookName);
+                                       System.out.println("Enter bookId: ");
+                                       String bookId = sc.nextLine();
+                                       Book book = service.findBook(bookId);
+                                       authorService.RemoveBook(book);
                                        System.out.println("Book removed from your published list.");
                                        break;
                                    }
@@ -404,14 +414,14 @@ public class Main {
                            String userId=String.format("%05d", authorId + 1);
 
                            System.out.println("Your Author User Id(please remember it): " + userId);
-
-                           Author newAuthor=new Author(email, userId, password, name);
+                           List<Book> publishedBooks = new ArrayList<>();
+                           Author newAuthor=new Author(email, userId, password, name, publishedBooks);
                            allAuthors.add(newAuthor);
 
                            // Save to file
                            try {
                                BufferedWriter authorinformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorInformation.txt", true));
-                               authorinformation.write("\n" + email + "|" + userId + "|" + password + "|" + name);
+                               authorinformation.write("\n" + email + "|" + userId + "|" + password + "|" + name + "|" + "dummybook");
                                authorinformation.close();
                                System.out.println("Author account created ...");
                            } catch (IOException e) {

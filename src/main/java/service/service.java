@@ -18,8 +18,8 @@ public class service {
     protected  static List<Author>allAuthors;
     protected Librarian current_librarian;
 
-    public service(List<Author> allAuthors, List<Book> allBooks) {
-        this.allAuthors = allAuthors;
+    public service(List<Book> allBooks) {
+//        this.allAuthors = allAuthors;
 //        this.allMembers = allMembers;
         this.allBooks = allBooks;
     }
@@ -29,7 +29,9 @@ public class service {
     public void addLibrarian(Librarian librarian){
         this.current_librarian = librarian;
     }
-
+    public void addAuthors(List<Author> allAuthors){
+        this.allAuthors = allAuthors;
+    }
 
     public static Member isMemberFound(String userId){
         for(var member: allMembers){

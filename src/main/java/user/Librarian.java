@@ -248,6 +248,7 @@ public class Librarian extends user{
 
             pendingIssuingBook.get(member).remove(bookId);
             // changing member information
+
             String filePath = "src\\main\\java\\Main\\memberInformation.txt";
             List<String> lines = Files.readAllLines(Paths.get(filePath));
             boolean found = false;
@@ -511,10 +512,34 @@ public class Librarian extends user{
             updatePendingPublishRequestsFile();
             System.out.println("Book publishing request approved");
             System.out.println("Book '" + bookToPublish.getName() +" 'is now available in the library.");
+
+            // handled author information file
+
+            String filePath = "src\\main\\java\\Main\\authorInformation.txt";
+            List<String> lines = Files.readAllLines(Paths.get(filePath));
+            boolean found = false;
+            for (int i = 0; i < lines.size(); i++){
+                if(lines.get(i).contains("|" + author.getUserId()+"|")){
+                    found = true;
+                    String[] parts = lines.get(i).split("\\|");
+                    String[] books = parts[4].split(",");
+
+                    List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                    String updatedBooks = String.join(",", bookList);
+                    if (!bookId.isEmpty()) {
+                        updatedBooks += (updatedBooks.isEmpty() ? "" : ",") + bookId;
+                    }
+                    parts[4] = updatedBooks;
+                    lines.set(i, String.join("|", parts));
+                    break;
+                }
+            }
+            Files.write(Paths.get(filePath), lines);
         }
         else{
             System.out.println("Invalid author ID or book ID.");
         }
+
     }
 
     private void updatePendingPublishRequestsFile() throws IOException {
@@ -540,8 +565,6 @@ public class Librarian extends user{
         }
         writer.close();
     }
-
-
 
 
 }

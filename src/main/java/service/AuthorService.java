@@ -7,7 +7,10 @@ import user.Librarian;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AuthorService {
@@ -32,8 +35,42 @@ public class AuthorService {
         System.out.println("wait for librarian approval.");
     }
 
-    public void RemoveBook(String bookname){
-        author.removeBook(bookname);
+    public void RemoveBook(Book book) throws IOException {
+        author.removeBook(book);
+
+        // changing author information
+        String filePath = "src\\main\\java\\Main\\authorInformation.txt";
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        boolean found = false;
+        for (int i = 0; i < lines.size(); i++){
+            if(lines.get(i).contains("|" + author.getUserId()+"|")){
+                found = true;
+                String[] parts = lines.get(i).split("\\|");
+                String[] books = parts[4].split(",");
+
+                List<String> bookList = new ArrayList<>(Arrays.asList(books));
+                bookList.remove(book.getBookId());
+                String updatedBooks = String.join(",", bookList);
+                parts[4] = updatedBooks;
+                lines.set(i, String.join("|", parts));
+                break;
+            }
+        }
+
+        //changing book information
+
+        filePath = "src\\main\\java\\Main\\bookInformation.txt";
+        lines = Files.readAllLines(Paths.get(filePath));
+        found = false;
+        for (int i = 0; i < lines.size(); i++){
+            if(lines.get(i).contains("|" + book.getBookId() + "|")){
+                found = true;
+                lines.remove(i);
+                break;
+            }
+        }
+        Files.write(Paths.get(filePath), lines);
+
     }
 
     public void showPublishedBooks(){
