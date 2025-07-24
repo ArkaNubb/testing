@@ -13,8 +13,6 @@ public abstract class user {
         this.name = name;
 
     }
-// I am Pritom
-
     @Override
     public String toString() {
         return email + "|" + userId + "|" + name;

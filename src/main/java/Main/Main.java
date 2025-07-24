@@ -1,14 +1,13 @@
 package Main;
 
 import book.Book;
-import service.service;
 import user.Author;
 import user.Librarian;
 import user.Member;
 import service.AuthorService;
-
-//import java.io.*;
-//import java.security.Provider;
+import service.BookService;
+import service.LibrarianService;
+import service.MemberService;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,22 +74,22 @@ public class Main {
             Book book = new Book(values[0], values[1], values[2], values[3], genre, ratings, total_copies, available_copies);
             allBooks.add(book);
         }
-//        System.out.println("1");
-        service serve = new service(allBooks);
+//        service serve = new service(allBooks);
+        BookService bookService = new BookService(allBooks);
 
         //loading authors
-
         for (var authorInfo: authorList){
             String [] values = authorInfo.split("\\|");
             String [] bookIds = values[4].split(",");
             List<Book>authorPublishedBooks = new ArrayList<>();
             for (var x: bookIds){
-                authorPublishedBooks.add(service.findBook(x));
+                authorPublishedBooks.add(bookService.findBook(x));
             }
             Author author = new Author(values[0], values[1], values[2], values[3], authorPublishedBooks);
             allAuthors.add(author);
         }
-        serve.addAuthors(allAuthors);
+//        serve.addAuthors(allAuthors);
+        AuthorService authorService = new AuthorService(allAuthors);
 
         //loading members
         for (var memberInfo: memberList){
@@ -100,17 +99,19 @@ public class Main {
             List<Book>booklist = new ArrayList<>();
             for(var x: bookIds){
                 if(x.equals("dummybook")) continue;
-                booklist.add(serve.findBook(x));
+                booklist.add(bookService.findBook(x));
             }
             Member member = new Member(valuess[0], valuess[1], valuess[2], valuess[3], booklist);
             allMembers.add(member);
         }
-        serve.addMembers(allMembers);
+//        serve.addMembers(allMembers);
+        MemberService memberService = new MemberService(allMembers);
 
         //loading librarian;
         String [] values = librarian.split("\\|");
         Librarian current_librarian = new Librarian(values[0], values[1], values[2], values[3]);
-        serve.addLibrarian(current_librarian);
+        LibrarianService librarianService = new LibrarianService(current_librarian);
+//        serve.addLibrarian(current_librarian);
 
 
         Scanner sc = new Scanner(System.in);
@@ -132,7 +133,7 @@ public class Main {
                    String password;
                    System.out.print("USER ID: ");
                    userId = sc.nextLine();
-                   Member member = serve.isMemberFound(userId);
+                   Member member = MemberService.isMemberFound(userId);
                    if(member != null){
                        System.out.print("PASSWORD: ");
                        password = sc.nextLine();
@@ -150,7 +151,7 @@ public class Main {
                                sc.nextLine();
                                switch (member_choice){
                                    case 1 : {
-                                       serve.showAllBooks();
+                                       BookService.showAllBooks();
                                        break;
                                    }
                                    case 2:{
@@ -161,7 +162,7 @@ public class Main {
                                        if(member.isMemberCanBorrow()){
                                            System.out.println("Enter bookId: ");
                                            String bookId = sc.nextLine();
-                                           serve.requestBorrowedBook(current_librarian, member, bookId);
+                                           librarianService.requestBorrowedBook(member, bookId);
                                        }
                                        else System.out.println("You've reached your maximum borrow limit");
                                        break;
@@ -171,7 +172,7 @@ public class Main {
                                        String bookId = sc.nextLine();
                                        System.out.println("Enter your rating: ");
                                        double rating = sc.nextDouble();
-                                       serve.returnBorrowedBook(current_librarian, member, bookId, rating);
+                                       librarianService.returnBorrowedBook(member, bookId, rating);
                                        break;
                                    }
                                }
@@ -192,21 +193,12 @@ public class Main {
                    System.out.print("USER ID: ");
                    userId = sc.nextLine();
 
-                   Author foundAuthor=null;
-                   for(Author author:allAuthors){
-                       if(author.getUserId().equals(userId)){
-                           foundAuthor = author;
-                           break;
-                       }
-                   }
-
-                   if(foundAuthor != null){
+                   Author author = AuthorService.isAuthorFound(userId);
+                   if(author != null){
                        System.out.print("PASSWORD: ");
                        password=sc.nextLine();
-                       if(foundAuthor.getPassword().equals(password)){
-                           System.out.println("Logged in as Author: " + foundAuthor.getName());
-
-                           AuthorService authorService = new AuthorService(foundAuthor);
+                       if(author.getPassword().equals(password)){
+                           System.out.println("Logged in as Author: " + author.getName());
 
                            int author_choice=0;
                            while(author_choice!=4){
@@ -243,7 +235,13 @@ public class Main {
                                        sc.nextLine();
 
                                        try {
-                                           authorService.requestPublishBook(bookName, publishedDate, genres, totalCopies, current_librarian);
+                                           List<Double> defaultRatings=new ArrayList<>();
+                                           String bookId = authorService.generateBookId();
+                                           Book book = new Book(bookName, bookId, publishedDate, author.getName(), genres, defaultRatings, totalCopies, totalCopies);
+                                           librarianService.requestPublishBook(author, book);
+                                           System.out.println("book publishing request sent to librarian :");
+                                           System.out.println("Book ID: " + bookId);
+                                           System.out.println("wait for librarian approval.");
                                        } catch (IOException e) {
                                            System.out.println("Error while requesting book publication: " + e.getMessage());
                                        }
@@ -254,7 +252,7 @@ public class Main {
 //                                       authorService.RemoveBook(bookName);
                                        System.out.println("Enter bookId: ");
                                        String bookId = sc.nextLine();
-                                       Book book = service.findBook(bookId);
+                                       Book book = BookService.findBook(bookId);
                                        authorService.RemoveBook(book);
                                        System.out.println("Book removed from your published list.");
                                        break;
@@ -276,7 +274,6 @@ public class Main {
                    String password;
                    System.out.print("USER ID: ");
                    userId = sc.nextLine();
-//                   Member member = serve.isMemberFound(userId);
                    if(current_librarian.getUserId().equals(userId)){
                        System.out.print("PASSWORD: ");
                        password = sc.nextLine();
@@ -294,11 +291,11 @@ public class Main {
                                sc.nextLine();
                                switch (librarian_choice){
                                    case 1 : {
-                                       serve.showAllBooks();
+                                       bookService.showAllBooks();
                                        break;
                                    }
                                    case 2:{
-                                       current_librarian.showPendingBooks(serve);
+                                       librarianService.showPendingBooks();
                                        int addChoice = 0;
                                        while(addChoice != 2){
                                            System.out.println("Enter 1 for approve pending issuing books");
@@ -311,7 +308,7 @@ public class Main {
                                                    String memberUserId = sc.nextLine();
                                                    System.out.print("Enter bookId: ");
                                                    String bookId = sc.nextLine();
-                                                   current_librarian.approveBook(serve, memberUserId, bookId);
+                                                   librarianService.approveBook(memberUserId, bookId);
                                                    break;
                                                }
                                            }
@@ -320,7 +317,7 @@ public class Main {
                                        break;
                                    }
                                    case 3:{
-                                       current_librarian.showPendingReturnBook(serve);
+                                       librarianService.showPendingReturnBook();
                                        int addChoice = 0;
                                        while(addChoice != 2){
                                            System.out.println("Enter 1 for accepting returned books");
@@ -333,7 +330,7 @@ public class Main {
                                                    String memberUserId = sc.nextLine();
                                                    System.out.print("Enter bookId: ");
                                                    String bookId = sc.nextLine();
-                                                   current_librarian.acceptBook(serve, memberUserId, bookId);
+                                                   librarianService.acceptBook(memberUserId, bookId);
                                                    break;
                                                }
                                            }
@@ -342,7 +339,7 @@ public class Main {
                                        break;
                                    }
                                    case 4: {
-                                       current_librarian.showPendingPublishRequests(serve);
+                                       librarianService.showPendingPublishRequests();
                                        int addChoice = 0;
                                        while (addChoice != 2) {
                                            System.out.println("Enter 1 to approve book publishing request");
@@ -356,7 +353,7 @@ public class Main {
                                                    System.out.print("Enter bookId to approve: ");
                                                    String bookId = sc.nextLine();
                                                    try {
-                                                       current_librarian.approvePublishRequest(serve, authorUserId, bookId);
+                                                       librarianService.approvePublishRequest(authorUserId, bookId);
                                                    } catch (IOException e) {
                                                        System.out.println("Error approving publish request: " + e.getMessage());
                                                    }
@@ -393,11 +390,11 @@ public class Main {
                            String email = sc.nextLine();
                            System.out.print("Enter your password: ");
                            String password = sc.nextLine();
-                           String userId = serve.generateMemberUserId();
+                           String userId = memberService.generateMemberUserId();
                            System.out.println("Your User Id(please remember it): " + userId);
                            List<Book>emptyList = new ArrayList<>();
                            Member member = new Member(email, userId, password, name, emptyList);
-                           serve.addMember(member);
+                           memberService.addMember(member);
                            break;
                        }
                        case 2:{
@@ -409,24 +406,15 @@ public class Main {
                            String password = sc.nextLine();
 
                            // Generate author ID
-                           Author lastAuthor=allAuthors.get(allAuthors.size() - 1);
-                           int authorId=Integer.parseInt(lastAuthor.getUserId());
-                           String userId=String.format("%05d", authorId + 1);
 
+                           String userId = authorService.genetateAuthorId();
                            System.out.println("Your Author User Id(please remember it): " + userId);
                            List<Book> publishedBooks = new ArrayList<>();
-                           Author newAuthor=new Author(email, userId, password, name, publishedBooks);
-                           allAuthors.add(newAuthor);
+                           Author newAuthor = new Author(email, userId, password, name, publishedBooks);
+                           authorService.addAuthor(newAuthor);
 
                            // Save to file
-                           try {
-                               BufferedWriter authorinformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorInformation.txt", true));
-                               authorinformation.write("\n" + email + "|" + userId + "|" + password + "|" + name + "|" + "dummybook");
-                               authorinformation.close();
-                               System.out.println("Author account created ...");
-                           } catch (IOException e) {
-                               System.out.println("Error creating author account " + e.getMessage());
-                           }
+
                            break;
                        }
                    }

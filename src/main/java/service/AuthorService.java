@@ -3,6 +3,7 @@ package service;
 import book.Book;
 import user.Author;
 import user.Librarian;
+import user.Member;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -14,25 +15,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AuthorService {
-
+    protected static List<Author>allAuthors;
     Author author;
-
+    public AuthorService(List<Author> allAuthors){
+        this.allAuthors = allAuthors;
+    }
     public AuthorService(Author author){
         this.author = author;
     }
 
-    public void requestPublishBook(String name,String publishedDate,List<String>genre,int totalCopies,Librarian librarian) throws IOException{
-        String bookId = generateBookId();
-        // with default rating currently 0.0
-        List<Double> defaultRatings=new ArrayList<>();
-        Book book=new Book(name, bookId, publishedDate, author.getName(), genre, defaultRatings, totalCopies, totalCopies);
-
-        // eequesting librarian to approve the publishing
-        librarian.addPendingPublishRequest(author, book);
-
-        System.out.println("book publishing request sent to librarian :");
-        System.out.println("Book ID: " + bookId);
-        System.out.println("wait for librarian approval.");
+    public static Author isAuthorFound(String userId){
+        for(var member: allAuthors){
+            if(member.getUserId().equals(userId)) return member;
+        }
+        return null;
     }
 
     public void RemoveBook(Book book) throws IOException {
@@ -80,7 +76,27 @@ public class AuthorService {
         author.showPublishedBooks();
     }
 
-    private String generateBookId() {
+    public String generateBookId() {
         return String.valueOf(20000 + (int)(Math.random() * 10000));
     }
+
+    public String genetateAuthorId(){
+        Author lastAuthor = allAuthors.get(allAuthors.size() - 1);
+        int authorId = Integer.parseInt(lastAuthor.getUserId());
+        String userId = String.format("%05d", authorId + 1);
+        return userId;
+    }
+    public void addAuthor(Author author){
+        allAuthors.add(author);
+        try {
+            BufferedWriter authorinformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorInformation.txt", true));
+            authorinformation.write("\n" + author.getUserId() + "|" + author.getUserId() + "|" + author.getPassword() + "|" + author.getName() + "|" + "dummybook");
+            authorinformation.close();
+            System.out.println("Author account created ...");
+        } catch (IOException e) {
+            System.out.println("Error creating author account " + e.getMessage());
+        }
+    }
+
+
 }
