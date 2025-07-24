@@ -13,7 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main {
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+
+
+public class Main extends Application{
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("main-view.fxml"));
+        stage.setScene(new Scene(root)); // Explicitly set size
+        stage.show();
+    }
+
     public static void main(String[] args) throws IOException {
 
         System.out.println("hello");
@@ -50,7 +66,8 @@ public class Main {
         authorInformation.close();
         memberInformation.close();
         librarianInformation.close();
-        // loading all information
+
+        // loading
         List<Book>allBooks = new ArrayList<>();
         List<Member>allMembers = new ArrayList<>();
         List<Author>allAuthors = new ArrayList<>();
@@ -74,7 +91,6 @@ public class Main {
             Book book = new Book(values[0], values[1], values[2], values[3], genre, ratings, total_copies, available_copies);
             allBooks.add(book);
         }
-//        service serve = new service(allBooks);
         BookService bookService = new BookService(allBooks);
 
         //loading authors
@@ -88,7 +104,6 @@ public class Main {
             Author author = new Author(values[0], values[1], values[2], values[3], authorPublishedBooks);
             allAuthors.add(author);
         }
-//        serve.addAuthors(allAuthors);
         AuthorService authorService = new AuthorService(allAuthors);
 
         //loading members
@@ -104,15 +119,16 @@ public class Main {
             Member member = new Member(valuess[0], valuess[1], valuess[2], valuess[3], booklist);
             allMembers.add(member);
         }
-//        serve.addMembers(allMembers);
         MemberService memberService = new MemberService(allMembers);
 
         //loading librarian;
         String [] values = librarian.split("\\|");
         Librarian current_librarian = new Librarian(values[0], values[1], values[2], values[3]);
         LibrarianService librarianService = new LibrarianService(current_librarian);
-//        serve.addLibrarian(current_librarian);
 
+        // here all uis
+
+//        launch(args);
 
         Scanner sc = new Scanner(System.in);
         int choice;
@@ -211,7 +227,7 @@ public class Main {
 
                                switch (author_choice){
                                    case 1: {
-                                       authorService.showPublishedBooks();
+                                       author.showPublishedBooks();
                                        break;
                                    }
                                    case 2: {
