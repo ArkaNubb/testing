@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.MemberController">
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="10" style="-fx-background-color: #37474F; -fx-border-color: #263238; -fx-border-width: 0 0 2 0;">
+            <padding>
+                <Insets left="20" right="20" />
+            </padding>
+            <Label fx:id="welcomeLabel" text="Dashboard" textFill="white">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="logoutButton" onAction="#handleLogout" style="-fx-background-color: #d9534f; -fx-text-fill: white;" text="Logout" />
+        </HBox>
+    </top>
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Browse Library Books">
+                    <content>
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <TableView fx:id="allBooksTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="allBookTitleCol" text="Title" prefWidth="300"/>
+                                    <TableColumn fx:id="allBookAuthorCol" text="Author" prefWidth="200"/>
+                                    <TableColumn fx:id="allBookIdCol" text="Book ID" prefWidth="100"/>
+                                    <TableColumn fx:id="allBookAvailableCol" text="Available Copies" prefWidth="120"/>
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                            </TableView>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <TextField fx:id="borrowBookIdField" promptText="Enter Book ID to Borrow"/>
+                                <Button text="Request Borrow" onAction="#handleRequestBorrow" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                                <Label fx:id="borrowMessageLabel" />
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Tab>
+                <Tab text="My Borrowed Books">
+                    <content>
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <TableView fx:id="myBooksTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="myBookTitleCol" text="Title" prefWidth="300"/>
+                                    <TableColumn fx:id="myBookAuthorCol" text="Author" prefWidth="200"/>
+                                    <TableColumn fx:id="myBookIdCol" text="Book ID" prefWidth="100"/>
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                            </TableView>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <TextField fx:id="returnBookIdField" promptText="Enter Book ID to Return"/>
+                                <TextField fx:id="ratingField" promptText="Rating (1-5)" maxWidth="100"/>
+                                <Button text="Request Return" onAction="#handleRequestReturn" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+                                <Label fx:id="returnMessageLabel" />
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

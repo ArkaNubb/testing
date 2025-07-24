@@ -50,4 +50,8 @@ public class Member extends user {
         return false;
     }
 
+    public List<Book> getBorrowedBooks() {
+        return borrowedBooks;
+    }
+
 }

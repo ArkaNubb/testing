@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.AuthorController">
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="10" style="-fx-background-color: #37474F; -fx-border-color: #263238; -fx-border-width: 0 0 2 0;">
+            <padding>
+                <Insets left="20" right="20" />
+            </padding>
+            <Label fx:id="welcomeLabel" text="Dashboard" textFill="white">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="logoutButton" onAction="#handleLogout" style="-fx-background-color: #d9534f; -fx-text-fill: white;" text="Logout" />
+        </HBox>
+    </top>
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="My Published Books">
+                    <content>
+                        <VBox spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                            <TableView fx:id="myBooksTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="bookTitleCol" text="Title" prefWidth="300"/>
+                                    <TableColumn fx:id="bookIdCol" text="Book ID" prefWidth="100"/>
+                                    <TableColumn fx:id="bookDateCol" text="Published Date" prefWidth="120"/>
+                                    <TableColumn fx:id="bookRatingCol" text="Avg. Rating" prefWidth="100"/>
+                                </columns>
+                                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+                <Tab text="Publish New Book">
+                    <content>
+                        <VBox spacing="10">
+                            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                            <Label text="Request to Publish a New Book">
+                                <font><Font name="System Bold" size="14.0"/></font>
+                            </Label>
+                            <TextField fx:id="titleField" promptText="Book Title"/>
+                            <TextField fx:id="dateField" promptText="Published Date (dd-mm-yyyy)"/>
+                            <TextField fx:id="genresField" promptText="Genres (comma-separated)"/>
+                            <TextField fx:id="copiesField" promptText="Total Copies"/>
+                            <Button text="Send Publish Request" onAction="#handlePublishRequest" style="-fx-background-color: #FF9800; -fx-text-fill: white;"/>
+                            <Label fx:id="publishMessageLabel"/>
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

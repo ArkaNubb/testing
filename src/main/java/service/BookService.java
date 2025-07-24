@@ -24,4 +24,7 @@ public class BookService {
     public static void addBookToSystem(Book book) {
         allBooks.add(book);
     }
+    public static List<Book> getAllBooks() {
+        return allBooks;
+    }
 }

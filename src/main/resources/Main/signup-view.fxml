@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="600.0" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.SignupController">
+    <children>
+        <Label text="Create New Account">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+        <ChoiceBox fx:id="roleChoiceBox" prefWidth="250.0" />
+        <TextField fx:id="nameField" maxWidth="250.0" promptText="Full Name" />
+        <TextField fx:id="emailField" maxWidth="250.0" promptText="Email" />
+        <PasswordField fx:id="passwordField" maxWidth="250.0" promptText="Password" />
+        <Button onAction="#handleSignup" prefWidth="150.0" text="Create Account" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        <Label fx:id="messageLabel" textFill="GREEN" />
+        <Hyperlink onAction="#handleBackToLogin" text="Back to Login" />
+    </children>
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>
