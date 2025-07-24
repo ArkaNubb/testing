@@ -44,19 +44,22 @@ public class AuthorService {
         boolean found = false;
         for (int i = 0; i < lines.size(); i++){
             if(lines.get(i).contains("|" + author.getUserId()+"|")){
+
                 found = true;
                 String[] parts = lines.get(i).split("\\|");
                 String[] books = parts[4].split(",");
 
                 List<String> bookList = new ArrayList<>(Arrays.asList(books));
                 bookList.remove(book.getBookId());
+//                System.out.println(lines.get(i));
                 String updatedBooks = String.join(",", bookList);
                 parts[4] = updatedBooks;
                 lines.set(i, String.join("|", parts));
+//                System.out.println(lines.get(i));
                 break;
             }
         }
-
+        Files.write(Paths.get(filePath), lines);
         //changing book information
 
         filePath = "src\\main\\java\\Main\\bookInformation.txt";
