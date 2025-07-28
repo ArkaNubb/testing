@@ -1,12 +1,12 @@
 package Main;
 
+import common.Authenticate;
+import common.MemberPackage;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import service.AuthorService;
-import service.MemberService;
-import service.ReadThreadServer;
 import service.server;
 import user.Author;
 import user.Librarian;
@@ -48,31 +48,25 @@ public class LoginController {
                 case MEMBER:
 //                    Member member = MemberService.isMemberFound(userId);
                     SocketWrapper socketWrapper = Main.getSocketWrapper();
-                    if(socketWrapper == null) System.out.println("yes");
+                    if (socketWrapper == null) {
+                        errorLabel.setText("Connection to server not established.");
+                        return;
+                    }
+
                     Authenticate authenticate = new Authenticate(userId, password);
-//                    new WriteThreadClient(socketWrapper, authenticate);
-//                    new ReadThreadClient(socketWrapper);
-                    Main.setMemberPackage(null);
+                    Main.setMemberPackage(null); // Clear previous login data
 
-                    // Create a thread that writes Authenticate and waits for response
-                    Thread loginThread = new Thread(() -> {
-                        try {
-                            // Send login data
-                            socketWrapper.write(authenticate);
+                    // Write to the server directly. No new thread needed for this.
+                    socketWrapper.write(authenticate);
 
-                            // Wait to read response
-                            Object obj = socketWrapper.read(); // blocks here
-
-                            if (obj instanceof MemberPackage) {
-                                Main.setMemberPackage((MemberPackage) obj);  // store for UI thread
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Login thread error: " + e);
+                    // **Crucial Change**: Wait for the ReadThreadClient to receive the data.
+                    // This simple loop waits up to a few seconds for the response.
+                    for (int i = 0; i < 100; i++) {
+                        if (Main.getMemberPackage() != null) {
+                            break;
                         }
-                    });
-
-                    loginThread.start();
-                    loginThread.join();
+                        Thread.sleep(50); // Pause briefly to allow the reader thread to work
+                    }
 
                     MemberPackage memberPackage = Main.getMemberPackage();
                     Member member = null;

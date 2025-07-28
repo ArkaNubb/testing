@@ -2,6 +2,7 @@ package Main;
 
 
 
+import common.MemberPackage;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,13 +10,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import util.SocketWrapper;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
 
 public class Main extends Application {
     public static SocketWrapper socketWrapper;
@@ -33,21 +28,11 @@ public class Main extends Application {
 
     }
     public Main(String serverAddress, int serverPort) {
-//        Scanner scanner = null;
         try {
-//            System.out.print("Enter name of the client: ");
-//            scanner = new Scanner(System.in);
-//            String clientName = scanner.nextLine();
-
             socketWrapper = new SocketWrapper(serverAddress, serverPort);
-//            System.out.println("connected");
-//            socketWrapper.write(clientName);
             new ReadThreadClient(socketWrapper);
-//            new WriteThreadClient(socketWrapper);
         } catch (Exception e) {
             System.out.println(e);
-        } finally {
-//            scanner.close();
         }
     }
 

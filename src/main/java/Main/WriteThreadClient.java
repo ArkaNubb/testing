@@ -1,9 +1,7 @@
 package Main;
 
+import common.Authenticate;
 import util.SocketWrapper;
-
-import java.io.IOException;
-import java.util.Scanner;
 
 public class WriteThreadClient implements Runnable {
 
@@ -27,9 +25,7 @@ public class WriteThreadClient implements Runnable {
     public void run() {
         System.out.println("writeClient");
         try {
-//            if(authenticate != null) {
                 socketWrapper.write(authenticate);
-//            }
         } catch (Exception e) {
             System.out.println(e);
         }

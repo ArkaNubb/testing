@@ -5,6 +5,8 @@ module com.example.library {
 
     opens Main to javafx.fxml;
     exports Main;
+    exports common;
+    opens common to javafx.fxml;
 }
 
 /*

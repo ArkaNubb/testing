@@ -1,9 +1,7 @@
 package Main;
 
-import Main.Message;
+import common.MemberPackage;
 import util.SocketWrapper;
-
-import java.io.IOException;
 
 public class ReadThreadClient implements Runnable {
     private Thread thr;

@@ -1,6 +1,6 @@
 package service;
 
-import Main.MemberPackage;
+import common.MemberPackage;
 import book.Book;
 import user.Member;
 import util.SocketWrapper;

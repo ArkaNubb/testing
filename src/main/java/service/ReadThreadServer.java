@@ -1,15 +1,9 @@
 package service;
 
-import Main.Authenticate;
-import Main.MemberPackage;
+import common.Authenticate;
+import common.MemberPackage;
 import user.Member;
 import util.SocketWrapper;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Objects;
-
-import Main.Message;
 
 public class ReadThreadServer implements Runnable {
     private Thread thr;
