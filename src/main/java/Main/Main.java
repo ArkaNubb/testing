@@ -1,19 +1,13 @@
 package Main;
 
-import book.Book;
-import service.AuthorService;
-import service.BookService;
-import service.LibrarianService;
-import service.MemberService;
-import user.Author;
-import user.Librarian;
-import user.Member;
+
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import util.SocketWrapper;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,19 +15,53 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main extends Application {
+    public static SocketWrapper socketWrapper;
+    private static MemberPackage memberPackage;
 
-    // Static services to be accessible from all UI controllers
-    public static BookService bookService;
-    public static MemberService memberService;
-    public static AuthorService authorService;
-    public static LibrarianService librarianService;
-    public static Librarian currentLibrarian;
+    public static void setMemberPackage(MemberPackage mp) {
+        memberPackage = mp;
+    }
+
+    public static MemberPackage getMemberPackage() {
+        return memberPackage;
+    }
+
+    public Main(){
+
+    }
+    public Main(String serverAddress, int serverPort) {
+//        Scanner scanner = null;
+        try {
+//            System.out.print("Enter name of the client: ");
+//            scanner = new Scanner(System.in);
+//            String clientName = scanner.nextLine();
+
+            socketWrapper = new SocketWrapper(serverAddress, serverPort);
+//            System.out.println("connected");
+//            socketWrapper.write(clientName);
+            new ReadThreadClient(socketWrapper);
+//            new WriteThreadClient(socketWrapper);
+        } catch (Exception e) {
+            System.out.println(e);
+        } finally {
+//            scanner.close();
+        }
+    }
+
+    public static SocketWrapper getSocketWrapper() {
+        return socketWrapper;
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // The SceneManager will handle all navigation between different screens
+//         The SceneManager will handle all navigation between different screens
+        String serverAddress = "localhost";
+        int serverPort = 44444;
+        new Main(serverAddress, serverPort);
+
         SceneManager.setStage(primaryStage);
 
         // Load the initial login view
@@ -47,104 +75,6 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) throws IOException {
-
-        // reading from file;
-        BufferedReader bookInformation = new BufferedReader(new FileReader("src/main/java/Main/bookInformation.txt"));
-        BufferedReader authorInformation = new BufferedReader(new FileReader("src/main/java/Main/authorInformation.txt"));
-        BufferedReader memberInformation = new BufferedReader(new FileReader("src/main/java/Main/memberInformation.txt"));
-        BufferedReader librarianInformation = new BufferedReader(new FileReader("src/main/java/Main/librarianInformation.txt"));
-
-        // reading booklist;
-        List<String>bookList = new ArrayList<>();
-        String str;
-        while((str = bookInformation.readLine()) != null){
-            bookList.add(str);
-        }
-
-        // reading authorlist;
-        List<String>authorList = new ArrayList<>();
-        while((str = authorInformation.readLine()) != null){
-            authorList.add(str);
-        }
-
-        // reading memberlist;
-        List<String>memberList = new ArrayList<>();
-        while((str = memberInformation.readLine()) != null){
-            memberList.add(str);
-        }
-
-        // reading libraring;
-        String librarian = librarianInformation.readLine();
-
-        bookInformation.close();
-        authorInformation.close();
-        memberInformation.close();
-        librarianInformation.close();
-
-        List<Book>allBooks = new ArrayList<>();
-        List<Member>allMembers = new ArrayList<>();
-        List<Author>allAuthors = new ArrayList<>();
-
-        // loading allbooks
-        for(var bookInfo: bookList){
-            if (bookInfo.trim().isEmpty()) continue;
-            String [] values = bookInfo.split("\\|");
-            if (values.length < 8) continue;
-            String [] genre__ = values[4].split(",");
-            String [] ratings__ = values[5].split(",");
-            List<String> genre = new ArrayList<>(Arrays.asList(genre__));
-            List<Double> ratings = new ArrayList<>();
-            if (!values[5].equalsIgnoreCase("dummyrating") && !values[5].trim().isEmpty()) {
-                for(var r: ratings__){
-                    if(!r.trim().isEmpty()) ratings.add(Double.parseDouble(r.trim()));
-                }
-            }
-            int total_copies = Integer.parseInt(values[6].trim());
-            int available_copies = Integer.parseInt(values[7].trim());
-            Book book = new Book(values[0], values[1], values[2], values[3], genre, ratings, total_copies, available_copies);
-            allBooks.add(book);
-        }
-        bookService = new BookService(allBooks);
-        //loading authors
-        for (var authorInfo: authorList){
-            if (authorInfo.trim().isEmpty()) continue;
-            String [] values = authorInfo.split("\\|");
-            if (values.length < 5) continue;
-            String [] bookIds = values[4].split(",");
-            List<Book>authorPublishedBooks = new ArrayList<>();
-            for (var x: bookIds){
-                if(!x.equalsIgnoreCase("dummybook") && !x.trim().isEmpty()){
-                    authorPublishedBooks.add(BookService.findBook(x.trim()));
-                }
-            }
-            Author author = new Author(values[0], values[1], values[2], values[3], authorPublishedBooks);
-            allAuthors.add(author);
-        }
-        authorService = new AuthorService(allAuthors);
-
-        //loading members
-        for (var memberInfo: memberList){
-            if (memberInfo.trim().isEmpty()) continue;
-            String [] valuess = memberInfo.split("\\|");
-            if (valuess.length < 5) continue;
-            String [] bookIds = valuess[4].split(",");
-
-            List<Book>booklist = new ArrayList<>();
-            for(var x: bookIds){
-                if(!x.equalsIgnoreCase("dummybook") && !x.trim().isEmpty()) {
-                    booklist.add(BookService.findBook(x.trim()));
-                }
-            }
-            Member member = new Member(valuess[0], valuess[1], valuess[2], valuess[3], booklist);
-            allMembers.add(member);
-        }
-        memberService = new MemberService(allMembers);
-
-        //loading librarian;
-        String [] values = librarian.split("\\|");
-        currentLibrarian = new Librarian(values[0], values[1], values[2], values[3]);
-        librarianService = new LibrarianService(currentLibrarian);
-
         launch(args);
     }
 }

@@ -1,6 +1,8 @@
 package user;
 
-public abstract class user {
+import java.io.Serializable;
+
+public abstract class user implements Serializable {
     protected String email;
     protected String userId;
     protected String password;

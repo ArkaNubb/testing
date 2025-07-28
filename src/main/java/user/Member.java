@@ -4,9 +4,10 @@ package user;
 
 import book.Book;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Member extends user {
+public class Member extends user implements Serializable {
 
     private List<Book>borrowedBooks;
     private final int maxBooks=5;

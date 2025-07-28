@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import service.BookService;
+import service.server;
 import user.user;
 
 import java.io.IOException;
@@ -69,7 +70,7 @@ public class LibrarianController {
 
     private void loadData() {
         ObservableList<IssueRequest> issueData = FXCollections.observableArrayList();
-        Main.librarianService.pendingIssuingBook.forEach((member, bookIds) -> {
+        server.librarianService.pendingIssuingBook.forEach((member, bookIds) -> {
             bookIds.stream()
                     .filter(id -> !id.equalsIgnoreCase("dummybook"))
                     .forEach(bookId -> {
@@ -80,7 +81,7 @@ public class LibrarianController {
         issueRequestsTable.setItems(issueData);
 
         ObservableList<ReturnRequest> returnData = FXCollections.observableArrayList();
-        Main.librarianService.pendingReturnedBook.forEach((member, pairs) -> {
+        server.librarianService.pendingReturnedBook.forEach((member, pairs) -> {
             pairs.stream()
                     .filter(p -> !p.first.equalsIgnoreCase("dummybook"))
                     .forEach(pair -> {
@@ -91,7 +92,7 @@ public class LibrarianController {
         returnRequestsTable.setItems(returnData);
 
         ObservableList<PublishRequest> publishData = FXCollections.observableArrayList();
-        Main.librarianService.pendingPublishRequests.forEach((author, books) -> {
+        server.librarianService.pendingPublishRequests.forEach((author, books) -> {
             books.stream()
                     .filter(b -> !b.getName().equalsIgnoreCase("dummybook"))
                     .forEach(book -> publishData.add(new PublishRequest(author.getName(), author.getUserId(), book.getName(), book.getBookId())));
@@ -102,7 +103,7 @@ public class LibrarianController {
     @FXML void handleApproveIssue(ActionEvent event) throws IOException {
         IssueRequest selected = issueRequestsTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            Main.librarianService.approveBook(selected.getMemberId(), selected.getBookId());
+            server.librarianService.approveBook(selected.getMemberId(), selected.getBookId());
             loadData();
         }
     }
@@ -110,7 +111,7 @@ public class LibrarianController {
     @FXML void handleAcceptReturn(ActionEvent event) throws IOException {
         ReturnRequest selected = returnRequestsTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            Main.librarianService.acceptBook(selected.getMemberId(), selected.getBookId());
+            server.librarianService.acceptBook(selected.getMemberId(), selected.getBookId());
             loadData();
         }
     }
@@ -118,7 +119,7 @@ public class LibrarianController {
     @FXML void handleApprovePublication(ActionEvent event) throws IOException {
         PublishRequest selected = publishRequestsTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            Main.librarianService.approvePublishRequest(selected.getAuthorId(), selected.getBookId());
+            server.librarianService.approvePublishRequest(selected.getAuthorId(), selected.getBookId());
             loadData();
         }
     }

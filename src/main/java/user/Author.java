@@ -4,11 +4,12 @@ package user;
 import book.Book;
 //import service.service;
 
+import java.io.Serializable;
 import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Author extends user{
+public class Author extends user implements Serializable {
 
     protected List<Book> publishedBooks;
 

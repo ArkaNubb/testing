@@ -8,6 +8,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import service.server;
 import user.Author;
 import user.Member;
 import user.UserRole;
@@ -45,15 +46,15 @@ public class SignupController {
 
         try {
             if (role == UserRole.MEMBER) {
-                String userId = Main.memberService.generateMemberUserId();
+                String userId = server.memberService.generateMemberUserId();
                 Member member = new Member(email, userId, password, name, new ArrayList<>());
-                Main.memberService.addMember(member);
+                server.memberService.addMember(member);
                 messageLabel.setText("Member account created! Your User ID is: " + userId);
                 messageLabel.setStyle("-fx-text-fill: green;");
             } else if (role == UserRole.AUTHOR) {
-                String userId = Main.authorService.genetateAuthorId();
+                String userId = server.authorService.genetateAuthorId();
                 Author author = new Author(email, userId, password, name, new ArrayList<>());
-                Main.authorService.addAuthor(author);
+                server.authorService.addAuthor(author);
                 messageLabel.setText("Author account created! Your User ID is: " + userId);
                 messageLabel.setStyle("-fx-text-fill: green;");
             }

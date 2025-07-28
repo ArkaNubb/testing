@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import service.server;
 import user.Member;
 
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class MemberController {
 
     private void loadData() {
         // This requires the getAllBooks() method you will add to BookService
-        allBooksTable.setItems(FXCollections.observableArrayList(Main.bookService.getAllBooks()));
+        allBooksTable.setItems(FXCollections.observableArrayList(Main.getMemberPackage().getAllBooks()));
         if (currentMember != null) {
             // This requires the getBorrowedBooks() method you will add to Member
             myBooksTable.setItems(FXCollections.observableArrayList(currentMember.getBorrowedBooks()));
@@ -77,7 +78,7 @@ public class MemberController {
             return;
         }
         try {
-            Main.librarianService.requestBorrowedBook(currentMember, bookId);
+            server.librarianService.requestBorrowedBook(currentMember, bookId);
             borrowMessageLabel.setText("Borrow request sent for Book ID: " + bookId);
             borrowBookIdField.clear();
         } catch (IOException e) {
@@ -102,7 +103,7 @@ public class MemberController {
                 returnMessageLabel.setText("Rating must be between 0 and 5.");
                 return;
             }
-            Main.librarianService.returnBorrowedBook(currentMember, bookId, rating);
+            server.librarianService.returnBorrowedBook(currentMember, bookId, rating);
             returnMessageLabel.setText("Return request sent for Book ID: " + bookId);
             returnBookIdField.clear();
             ratingField.clear();

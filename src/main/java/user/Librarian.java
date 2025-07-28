@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-public class Librarian extends user{
+public class Librarian extends user implements Serializable{
 
 //    private List<Book>issuedBooks;
 //    public Map<Member, List<String>> pendingIssuingBook;

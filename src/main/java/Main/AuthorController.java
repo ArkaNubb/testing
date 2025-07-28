@@ -13,6 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import service.AuthorService;
+import service.server;
 import user.Author;
 
 import java.io.IOException;
@@ -82,11 +83,11 @@ public class AuthorController {
         try {
             int copies = Integer.parseInt(copiesStr);
             List<String> genres = Arrays.asList(genresStr.split(","));
-            String bookId = Main.authorService.generateBookId();
+            String bookId = server.authorService.generateBookId();
 
             Book newBook = new Book(title, bookId, date, currentAuthor.getName(), genres, new ArrayList<>(), copies, copies);
 
-            Main.librarianService.requestPublishBook(currentAuthor, newBook);
+            server.librarianService.requestPublishBook(currentAuthor, newBook);
             publishMessageLabel.setText("Publish request sent for '" + title + "'. Awaiting librarian approval.");
 
             titleField.clear();
