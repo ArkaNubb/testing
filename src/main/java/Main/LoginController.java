@@ -77,7 +77,6 @@ public class LoginController {
                     }
                     break;
                 case LIBRARIAN:
-
                     socketWrapper = Main.getSocketWrapper();
                     if (socketWrapper == null) {
                         errorLabel.setText("Connection to server not established.");
@@ -87,12 +86,11 @@ public class LoginController {
                     LibrarianAuthenticate librarianAuthenticate = new LibrarianAuthenticate(userId, password);
                     Main.setLibrarianPackage(null);
 
-
                     // Write to the server directly. No new thread needed for this.
                     socketWrapper.write(librarianAuthenticate);
                     for (int i = 0; i < 100; i++) {
                         if (Main.getLibrarianPackage() != null) {
-                            System.out.println("yeeee");
+                            System.out.println("LibrarianPackage received");
                             break;
                         }
                         Thread.sleep(50); // Pause briefly to allow the reader thread to work
@@ -100,12 +98,26 @@ public class LoginController {
 
                     LibrarianPackage librarianPackage = Main.getLibrarianPackage();
                     Librarian librarian = null;
-                    if(librarianPackage != null) librarian = librarianPackage.getLibrarian();
-                    System.out.println(librarian.getName());
-                    if (librarian.getUserId().equals(userId) && librarian.getPassword().equals(password)) {
-                        SceneManager.setCurrentUser(librarian);
-                        loginSuccess = true;
-                        nextScene = "/Main/librarian-view.fxml";
+                    if(librarianPackage != null) {
+                        librarian = librarianPackage.getLibrarian();
+                    }
+
+                    // Add proper null checking here
+                    if (librarian != null) {
+                        System.out.println("Librarian found: " + librarian.getName());
+                        if (librarian.getUserId().equals(userId) && librarian.getPassword().equals(password)) {
+                            SceneManager.setCurrentUser(librarian);
+                            loginSuccess = true;
+                            nextScene = "/Main/librarian-view.fxml";
+
+                            // ADD THIS: Ensure the UI will be refreshed when the scene loads
+                            // The LibrarianController.initialize() will handle setting up the controller reference
+                        } else {
+                            System.out.println("Invalid credentials for librarian");
+                        }
+                    } else {
+                        System.out.println("Librarian is null - authentication failed");
+                        errorLabel.setText("Authentication failed. Please check your credentials.");
                     }
                     break;
             }

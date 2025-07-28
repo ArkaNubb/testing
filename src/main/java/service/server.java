@@ -5,10 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import common.Book;
 import common.Author;
@@ -25,19 +23,22 @@ public class server {
     public static Librarian currentLibrarian;
     private ServerSocket serverSocket;
 
-    public static HashMap<String, SocketWrapper> clientMap = new HashMap<>();
+    public static Map<String, SocketWrapper> clientMap = new ConcurrentHashMap<>();
 
     server() {
-        clientMap = new HashMap<>();
+        // --- IMPORTANT: DO NOT re-initialize the static map here ---
+        // clientMap = new HashMap<>(); // REMOVE THIS LINE
         try {
             serverSocket = new ServerSocket(44444);
+            System.out.println("Server started. Waiting for clients...");
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("connected");
+                System.out.println("Client connected: " + clientSocket.getInetAddress());
                 serve(clientSocket);
             }
         } catch (Exception e) {
-            System.out.println("Server starts:" + e);
+            System.out.println("Server error:" + e);
+            e.printStackTrace();
         }
     }
 

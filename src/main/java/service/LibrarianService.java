@@ -1,15 +1,12 @@
 package service;
 
-import common.Book;
-import common.Author;
-import common.Librarian;
-import common.Member;
-import common.Pair;
+import common.*;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import service.server;
 
 public class LibrarianService {
     public static Librarian librarian;
@@ -81,15 +78,11 @@ public class LibrarianService {
                     double rating = Double.parseDouble(bookRating[1]);
                     bookPairs.add(new Pair<>(bookId, rating));
                 }
-//                else{
-//                    bookPairs.add(new Pair<>(v, 0.0));
-//                }
             }
             pendingReturnedBook.put(member, bookPairs);
         }
 
         // reading author pending books
-//        pendingPublishRequests = new HashMap<>();
         BufferedReader readPendingPublishRequests = new BufferedReader(new FileReader("src\\main\\java\\service\\authorPendingRequest.txt"));
 
         // Reading pending publish requests
@@ -113,7 +106,7 @@ public class LibrarianService {
                 List<String> genres = Arrays.asList(genreArray);
                 int totalCopies = Integer.parseInt(bookParts[4]);
                 Book book=new Book(bookParts[0], bookParts[0], bookParts[0], author.getName(), genres, new ArrayList<>(), totalCopies, totalCopies);
-                    books.add(book);
+                books.add(book);
             }
             pendingPublishRequests.put(author, books);
         }
@@ -122,6 +115,8 @@ public class LibrarianService {
     }
 
     public void requestBorrowedBook(Member member, String bookId) throws IOException {
+        System.out.println("🔄 Processing borrow request for member: " + member.getName() + ", bookId: " + bookId);
+
         if(pendingIssuingBook.containsKey(member)){
             pendingIssuingBook.get(member).add(bookId);
             String filePath = "src\\main\\java\\service\\librarianPendingBooks.txt";
@@ -153,8 +148,14 @@ public class LibrarianService {
             pendingInformation.write( member.getUserId() + "|" + "dummybook," + bookId + "\n");
             pendingInformation.close();
         }
+
+        System.out.println("✅ Borrow request processed, triggering broadcast...");
+        broadcastLibrarianUpdate();
     }
+
     public void returnBorrowedBook(Member member, String bookId, double rating) throws IOException {
+        System.out.println("🔄 Processing return request for member: " + member.getName() + ", bookId: " + bookId);
+
         if(pendingReturnedBook.containsKey(member)){
             pendingReturnedBook.get(member).add(new Pair<>(bookId, rating));
             String filePath = "src\\main\\java\\service\\librarianPendingReturnBooks.txt";
@@ -186,18 +187,10 @@ public class LibrarianService {
             pendingInformation.write(member.getUserId() + "|" + "dummybook," + bookId +":"+rating+ "\n");
             pendingInformation.close();
         }
+
+        System.out.println("✅ Return request processed, triggering broadcast...");
+        broadcastLibrarianUpdate();
     }
-
-
-
-//    public void issueBook(Member member, Book book){
-//        member.addBorrowedBook(book);
-//        librarian.pendingIssuingBook.get(member).remove(book);
-//    }
-//    public void acceptRetunedBook(Member member, Book book){
-//        member.removeBook(book);
-//        librarian.pendingIssuingBook.get(member).remove(book);
-//    }
 
     public void requestPublishBook(Author author, Book book) throws IOException {
         // old author hoile just ager info
@@ -212,6 +205,7 @@ public class LibrarianService {
             pendingPublishRequests.put(author,books);
             updatePendingPublishFile(author,book,true);
         }
+        broadcastLibrarianUpdate();
     }
 
     private void updatePendingPublishFile(Author author, Book book, boolean isNewAuthor) throws IOException {
@@ -288,7 +282,6 @@ public class LibrarianService {
             Files.write(Paths.get(filePath), lines);
 
             //changing book avaibility information
-
             filePath = "src\\main\\java\\service\\bookInformation.txt";
             lines = Files.readAllLines(Paths.get(filePath));
             found = false;
@@ -306,7 +299,6 @@ public class LibrarianService {
             book.setAvailable_copies(book.isAvailable() - 1);
 
             //changing pending books information
-
             filePath = "src\\main\\java\\service\\librarianPendingBooks.txt";
             lines = Files.readAllLines(Paths.get(filePath));
             found = false;
@@ -326,6 +318,10 @@ public class LibrarianService {
                 }
             }
             Files.write(Paths.get(filePath), lines);
+
+            broadcastLibrarianUpdate();
+            broadcastMemberUpdate(memberUserId); // Update the specific member's UI
+            broadcastToAllMembers();
         }
         else System.out.println("BOOK IS NOT AVAILABLE");
     }
@@ -357,7 +353,6 @@ public class LibrarianService {
         Member member = MemberService.isMemberFound(memberUserId);
         member.removeBook(BookService.findBook(bookId));
 
-
         // find the rating
         double rating=0.0;
         Pair<String,Double> bookToRemove=null;
@@ -371,7 +366,6 @@ public class LibrarianService {
         if(bookToRemove!=null) pendingReturnedBook.get(member).remove(bookToRemove);
 
         //changing member information
-
         String filePath = "src\\main\\java\\service\\memberInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;
@@ -392,8 +386,8 @@ public class LibrarianService {
         Files.write(Paths.get(filePath), lines);
         Book book = BookService.findBook(bookId);
         book.setAvailable_copies(book.isAvailable() + 1);
-        // changing book avaibility
 
+        // changing book avaibility
         filePath = "src\\main\\java\\service\\bookInformation.txt";
         lines = Files.readAllLines(Paths.get(filePath));
         found = false;
@@ -419,7 +413,6 @@ public class LibrarianService {
         Files.write(Paths.get(filePath), lines);
 
         //changing return book information
-
         filePath = "src\\main\\java\\service\\librarianPendingReturnBooks.txt";
         lines = Files.readAllLines(Paths.get(filePath));
         found = false;
@@ -450,6 +443,10 @@ public class LibrarianService {
             }
         }
         Files.write(Paths.get(filePath), lines);
+
+        broadcastLibrarianUpdate();
+        broadcastMemberUpdate(memberUserId); // Update the specific member's UI
+        broadcastToAllMembers();
     }
 
     public void showPendingPublishRequests(){
@@ -542,6 +539,8 @@ public class LibrarianService {
             System.out.println("Invalid author ID or book ID.");
         }
 
+        broadcastLibrarianUpdate();
+
     }
 
     private void updatePendingPublishRequestsFile() throws IOException {
@@ -568,4 +567,88 @@ public class LibrarianService {
         writer.close();
     }
 
+    // FIXED: Enhanced broadcast method with better debugging and error handling
+    // In LibrarianService.java
+
+    private void broadcastLibrarianUpdate() {
+        try {
+            System.out.println("🔄 Starting broadcastLibrarianUpdate...");
+            Librarian currentLibrarian = LibrarianService.getLibrarian();
+            if (currentLibrarian == null) {
+                System.out.println("❌ ERROR: Librarian is null - cannot broadcast");
+                return;
+            }
+
+            String librarianUserId = currentLibrarian.getUserId();
+            if (server.clientMap.containsKey(librarianUserId)) {
+                System.out.println("✅ Librarian found in clientMap - preparing broadcast...");
+
+                LibrarianPackage librarianPackage = new LibrarianPackage(
+                        currentLibrarian,
+                        LibrarianService.getPendingIssuingBook(),
+                        LibrarianService.getPendingReturnedBook(),
+                        LibrarianService.getPendingPublishRequests(),
+                        BookService.getAllBooks()
+                );
+
+                SocketWrapper librarianSocket = server.clientMap.get(librarianUserId);
+
+                // --- FIX: Write directly to the socket instead of creating a new thread ---
+                librarianSocket.write(librarianPackage);
+
+                System.out.println("✅ Real-time update sent to librarian successfully!");
+
+            } else {
+                System.out.println("ℹ️  Librarian '" + librarianUserId + "' not found in clientMap");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ ERROR in broadcastLibrarianUpdate: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void broadcastMemberUpdate(String memberUserId) {
+        try {
+            System.out.println("🔄 Broadcasting member update to: " + memberUserId);
+
+            if (server.clientMap.containsKey(memberUserId)) {
+                Member updatedMember = MemberService.isMemberFound(memberUserId);
+                if (updatedMember != null) {
+                    MemberPackage memberPackage = new MemberPackage(updatedMember, BookService.getAllBooks());
+
+                    SocketWrapper memberSocket = server.clientMap.get(memberUserId);
+                    memberSocket.write(memberPackage);
+
+                    System.out.println("✅ Real-time update sent to member: " + memberUserId);
+                }
+            } else {
+                System.out.println("ℹ️  Member '" + memberUserId + "' not found in clientMap");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ ERROR in broadcastMemberUpdate: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Broadcast to all connected members (useful when book availability changes)
+     */
+    private void broadcastToAllMembers() {
+        try {
+            System.out.println("🔄 Broadcasting updates to all connected members...");
+
+            for (String userId : server.clientMap.keySet()) {
+                Member member = MemberService.isMemberFound(userId);
+                if (member != null) {
+                    // This is a member, not a librarian
+                    broadcastMemberUpdate(userId);
+                }
+            }
+
+            System.out.println("✅ Broadcast to all members completed");
+        } catch (Exception e) {
+            System.out.println("❌ ERROR in broadcastToAllMembers: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

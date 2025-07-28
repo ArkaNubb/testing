@@ -13,7 +13,6 @@ public class SocketWrapper {
     public SocketWrapper(String s, int port) throws IOException { // used by the client
         this.socket = new Socket(s, port);
         oos = new ObjectOutputStream(socket.getOutputStream());
-        oos.flush();
         ois = new ObjectInputStream(socket.getInputStream());
     }
 
@@ -27,13 +26,25 @@ public class SocketWrapper {
         return ois.readObject();
     }
 
-    public void write(Object o) throws IOException {
+    /**
+     * This method is now synchronized to prevent multiple threads from
+     * writing to the same stream at the same time, which would corrupt it.
+     * oos.reset() is called to clear the output stream's object cache,
+     * ensuring that any updates to an object are sent.
+     */
+    public synchronized void write(Object o) throws IOException {
         oos.writeObject(o);
+        oos.reset(); // Prevents caching issues with updated objects
         oos.flush();
     }
 
     public void closeConnection() throws IOException {
-        ois.close();
-        oos.close();
+        try {
+            if (ois != null) ois.close();
+            if (oos != null) oos.close();
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            System.out.println("Error closing socket wrapper: " + e.getMessage());
+        }
     }
 }

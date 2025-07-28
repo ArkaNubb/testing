@@ -18,6 +18,7 @@ public class Main extends Application {
 
     // --- MODIFICATION 1: Add a static reference for the LibrarianController ---
     private static LibrarianController librarianController;
+    private static MemberController memberController;
 
     public static void setMemberPackage(MemberPackage memberPackage) {
         Main.memberPackage = memberPackage;
@@ -44,6 +45,13 @@ public class Main extends Application {
         Main.librarianController = controller;
     }
 
+    public static MemberController getMemberController() {
+        return memberController;
+    }
+
+    public static void setMemberController(MemberController controller) {
+        Main.memberController = controller;
+    }
 
     public Main(){
         // Default constructor

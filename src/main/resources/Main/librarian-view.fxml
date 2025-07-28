@@ -25,22 +25,32 @@
                 </font>
             </Label>
             <Region HBox.hgrow="ALWAYS" />
+            <!-- Add refresh button for debugging -->
+            <Button onAction="#handleRefresh" text="Refresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
             <Button onAction="#handleLogout" text="Logout" style="-fx-background-color: #f44336; -fx-text-fill: white;" />
         </HBox>
     </top>
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE">
+        <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
                 <Tab text="Pending Issue Requests">
                     <content>
-                        <VBox spacing="10">
+                        <VBox spacing="10" fillWidth="true">
                             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-                            <TableView fx:id="issueRequestsTable" VBox.vgrow="ALWAYS">
+
+                            <!-- Add debug label -->
+                            <Label fx:id="issueCountLabel" text="Loading..." style="-fx-font-weight: bold;" />
+
+                            <TableView fx:id="issueRequestsTable"
+                                       VBox.vgrow="ALWAYS"
+                                       prefHeight="400.0"
+                                       minHeight="200.0"
+                                       maxHeight="Infinity">
                                 <columns>
-                                    <TableColumn fx:id="issueMemberNameCol" text="Member Name" prefWidth="150"/>
-                                    <TableColumn fx:id="issueMemberIdCol" text="Member ID" prefWidth="100"/>
-                                    <TableColumn fx:id="issueBookTitleCol" text="Book Title" prefWidth="300"/>
-                                    <TableColumn fx:id="issueBookIdCol" text="Book ID" prefWidth="100"/>
+                                    <TableColumn fx:id="issueMemberNameCol" text="Member Name" prefWidth="150" minWidth="100"/>
+                                    <TableColumn fx:id="issueMemberIdCol" text="Member ID" prefWidth="100" minWidth="80"/>
+                                    <TableColumn fx:id="issueBookTitleCol" text="Book Title" prefWidth="300" minWidth="200"/>
+                                    <TableColumn fx:id="issueBookIdCol" text="Book ID" prefWidth="100" minWidth="80"/>
                                 </columns>
                                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                             </TableView>
@@ -50,15 +60,23 @@
                 </Tab>
                 <Tab text="Pending Return Requests">
                     <content>
-                        <VBox spacing="10">
+                        <VBox spacing="10" fillWidth="true">
                             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-                            <TableView fx:id="returnRequestsTable" VBox.vgrow="ALWAYS">
+
+                            <!-- Add debug label -->
+                            <Label fx:id="returnCountLabel" text="Loading..." style="-fx-font-weight: bold;" />
+
+                            <TableView fx:id="returnRequestsTable"
+                                       VBox.vgrow="ALWAYS"
+                                       prefHeight="400.0"
+                                       minHeight="200.0"
+                                       maxHeight="Infinity">
                                 <columns>
-                                    <TableColumn fx:id="returnMemberNameCol" text="Member Name" prefWidth="150"/>
-                                    <TableColumn fx:id="returnMemberIdCol" text="Member ID" prefWidth="100"/>
-                                    <TableColumn fx:id="returnBookTitleCol" text="Book Title" prefWidth="300"/>
-                                    <TableColumn fx:id="returnBookIdCol" text="Book ID" prefWidth="100"/>
-                                    <TableColumn fx:id="returnRatingCol" text="Rating" prefWidth="75"/>
+                                    <TableColumn fx:id="returnMemberNameCol" text="Member Name" prefWidth="150" minWidth="100"/>
+                                    <TableColumn fx:id="returnMemberIdCol" text="Member ID" prefWidth="100" minWidth="80"/>
+                                    <TableColumn fx:id="returnBookTitleCol" text="Book Title" prefWidth="300" minWidth="200"/>
+                                    <TableColumn fx:id="returnBookIdCol" text="Book ID" prefWidth="100" minWidth="80"/>
+                                    <TableColumn fx:id="returnRatingCol" text="Rating" prefWidth="75" minWidth="60"/>
                                 </columns>
                                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                             </TableView>
@@ -68,14 +86,22 @@
                 </Tab>
                 <Tab text="Pending Publish Requests">
                     <content>
-                        <VBox spacing="10">
+                        <VBox spacing="10" fillWidth="true">
                             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-                            <TableView fx:id="publishRequestsTable" VBox.vgrow="ALWAYS">
+
+                            <!-- Add debug label -->
+                            <Label fx:id="publishCountLabel" text="Loading..." style="-fx-font-weight: bold;" />
+
+                            <TableView fx:id="publishRequestsTable"
+                                       VBox.vgrow="ALWAYS"
+                                       prefHeight="400.0"
+                                       minHeight="200.0"
+                                       maxHeight="Infinity">
                                 <columns>
-                                    <TableColumn fx:id="publishAuthorNameCol" text="Author Name" prefWidth="150"/>
-                                    <TableColumn fx:id="publishAuthorIdCol" text="Author ID" prefWidth="100"/>
-                                    <TableColumn fx:id="publishBookTitleCol" text="Book Title" prefWidth="300"/>
-                                    <TableColumn fx:id="publishBookIdCol" text="Book ID" prefWidth="100"/>
+                                    <TableColumn fx:id="publishAuthorNameCol" text="Author Name" prefWidth="150" minWidth="100"/>
+                                    <TableColumn fx:id="publishAuthorIdCol" text="Author ID" prefWidth="100" minWidth="80"/>
+                                    <TableColumn fx:id="publishBookTitleCol" text="Book Title" prefWidth="300" minWidth="200"/>
+                                    <TableColumn fx:id="publishBookIdCol" text="Book ID" prefWidth="100" minWidth="80"/>
                                 </columns>
                                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                             </TableView>

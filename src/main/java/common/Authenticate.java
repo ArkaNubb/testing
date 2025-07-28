@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Authenticate implements Serializable {
     private String userId;
     private String passWord;
-
+    int choice;
     public Authenticate(String userId, String passWord) {
         this.userId = userId;
         this.passWord = passWord;
