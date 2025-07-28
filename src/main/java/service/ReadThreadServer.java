@@ -27,30 +27,17 @@ public class ReadThreadServer implements Runnable {
                 Object obj = socketWrapper.read();
 
                 if (obj instanceof Authenticate) {
-                    System.out.println("🔐 Processing Member Authentication...");
                     Member member = MemberService.isMemberFound(((Authenticate) obj).getUserId());
-                    System.out.println("👤 Member found: " + (member != null ? member.getName() : "null"));
-
                     if (member != null) {
                         MemberPackage memberPackage = new MemberPackage(member, BookService.getAllBooks());
-
-                        // Add member to client map if not already present
                         if (!server.clientMap.containsKey(member.getUserId())) {
-                            server.clientMap.put(member.getUserId(), socketWrapper);
-                            System.out.println("✅ Added member to clientMap: " + member.getUserId());
-                        }
+                            server.clientMap.put(member.getUserId(), socketWrapper);}
 
-                        socketWrapper.write(memberPackage);
-                        System.out.println("📦 MemberPackage sent to: " + member.getName());
-                    }
+                        socketWrapper.write(memberPackage);}
                 }
 
                 if (obj instanceof LibrarianAuthenticate) {
-                    System.out.println("🔐 Processing Librarian Authentication...");
-
                     Librarian librarian = LibrarianService.getLibrarian();
-                    System.out.println("👨‍💼 Librarian found: " + (librarian != null ? librarian.getName() : "null"));
-
                     if (librarian != null) {
                         LibrarianPackage librarianPackage = new LibrarianPackage(
                                 librarian,
@@ -70,10 +57,6 @@ public class ReadThreadServer implements Runnable {
                     MemberRequest memberRequest = (MemberRequest) obj;
                     Member currentMember = MemberService.isMemberFound(memberRequest.getUserID());
 
-                    System.out.println("📚 Received MemberRequest from " +
-                            (currentMember != null ? currentMember.getName() : "unknown") +
-                            " for book " + memberRequest.getBookID());
-
                     if (currentMember != null) {
                         try {
                             // Process the request - this will trigger broadcastLibrarianUpdate() internally
@@ -87,20 +70,14 @@ public class ReadThreadServer implements Runnable {
                                 server.librarianService.acceptBook(memberRequest.getUserID(), memberRequest.getBookID());
 
                             }
-                            System.out.println("✅ MemberRequest processed successfully");
                         } catch (IOException e) {
-                            System.out.println("❌ Error processing MemberRequest: " + e.getMessage());
                             e.printStackTrace();
                         }
-                    } else {
-                        System.out.println("❌ Member not found for userId: " + memberRequest.getUserID());
                     }
                 }
                 if (obj instanceof LogoutRequest) {
                     LogoutRequest logoutRequest = (LogoutRequest) obj;
                     server.clientMap.remove(logoutRequest.getUserId());
-                    System.out.println("👋 User " + logoutRequest.getUserId() + " logged out and removed from clientMap");
-                    System.out.println("📋 ClientMap now contains: " + server.clientMap.keySet());
                 }
             }
         } catch (Exception e) {
