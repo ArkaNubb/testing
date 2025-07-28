@@ -1,12 +1,9 @@
-package user;
+package common;
 
 
-import book.Book;
 //import service.service;
 
 import java.io.Serializable;
-import java.security.Provider;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Author extends user implements Serializable {

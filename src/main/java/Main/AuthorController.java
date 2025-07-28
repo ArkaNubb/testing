@@ -1,6 +1,6 @@
 package Main;
 
-import book.Book;
+import common.Book;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,7 +14,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import service.AuthorService;
 import service.server;
-import user.Author;
+import common.Author;
 
 import java.io.IOException;
 import java.util.ArrayList;

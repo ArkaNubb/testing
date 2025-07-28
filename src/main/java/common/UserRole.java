@@ -1,4 +1,4 @@
-package user;
+package common;
 
 public enum UserRole {
     MEMBER,

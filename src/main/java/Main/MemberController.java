@@ -1,6 +1,8 @@
 package Main;
 
-import book.Book;
+import common.Book;
+import common.MemberRequest;
+import common.SocketWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -11,7 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import service.server;
-import user.Member;
+import common.Member;
 
 import java.io.IOException;
 
@@ -67,7 +69,7 @@ public class MemberController {
         }
     }
 
-    @FXML void handleRequestBorrow(ActionEvent event) {
+    @FXML void handleRequestBorrow(ActionEvent event) throws IOException {
         String bookId = borrowBookIdField.getText();
         if (bookId.isEmpty()) {
             borrowMessageLabel.setText("Please enter a Book ID.");
@@ -77,14 +79,12 @@ public class MemberController {
             borrowMessageLabel.setText("You have reached the borrow limit (5 books).");
             return;
         }
-        try {
-            server.librarianService.requestBorrowedBook(currentMember, bookId);
-            borrowMessageLabel.setText("Borrow request sent for Book ID: " + bookId);
-            borrowBookIdField.clear();
-        } catch (IOException e) {
-            borrowMessageLabel.setText("Error sending request.");
-            e.printStackTrace();
-        }
+        SocketWrapper socketWrapper = Main.getSocketWrapper();
+        MemberRequest memberRequest = new MemberRequest(bookId, currentMember.getUserId());
+//            server.librarianService.requestBorrowedBook(currentMember, bookId);
+        socketWrapper.write(memberRequest);
+        borrowMessageLabel.setText("Borrow request sent for Book ID: " + bookId);
+        borrowBookIdField.clear();
     }
 
     @FXML void handleRequestReturn(ActionEvent event) {

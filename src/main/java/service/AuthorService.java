@@ -1,9 +1,7 @@
 package service;
 
-import book.Book;
-import user.Author;
-import user.Librarian;
-import user.Member;
+import common.Book;
+import common.Author;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -35,7 +33,7 @@ public class AuthorService {
         author.removeBook(book);
         BookService.removeBookFromBookService(book);
         // changing author information
-        String filePath = "src\\main\\java\\Main\\authorInformation.txt";
+        String filePath = "src\\main\\java\\service\\authorInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;
         for (int i = 0; i < lines.size(); i++){
@@ -58,7 +56,7 @@ public class AuthorService {
         Files.write(Paths.get(filePath), lines);
         //changing book information
 
-        filePath = "src\\main\\java\\Main\\bookInformation.txt";
+        filePath = "src\\main\\java\\service\\bookInformation.txt";
         lines = Files.readAllLines(Paths.get(filePath));
         found = false;
         for (int i = 0; i < lines.size(); i++){

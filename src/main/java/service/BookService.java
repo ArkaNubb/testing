@@ -1,6 +1,6 @@
 package service;
 
-import book.Book;
+import common.Book;
 
 import java.util.List;
 

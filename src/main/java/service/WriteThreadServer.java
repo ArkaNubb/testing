@@ -1,9 +1,6 @@
 package service;
 
-import common.MemberPackage;
-import book.Book;
-import user.Member;
-import util.SocketWrapper;
+import common.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,6 +10,7 @@ public class WriteThreadServer implements Runnable{
     private SocketWrapper socketWrapper;
     Member member;
     List<Book>allbooks;
+    LibrarianPackage librarianPackage;
 
     public WriteThreadServer(SocketWrapper socketWrapper, Member member, List<Book>allbooks) {
         this.allbooks = allbooks;
@@ -21,16 +19,21 @@ public class WriteThreadServer implements Runnable{
         this.thr = new Thread(this);
         thr.start();
     }
+    public WriteThreadServer(SocketWrapper socketWrapper, LibrarianPackage librarianPackage){
+        this.socketWrapper = socketWrapper;
+        this.librarianPackage = librarianPackage;
+        this.thr = new Thread(this);
+        thr.start();
+    }
+
 
     @Override
     public void run() {
 
         try {
 //            while (true){
-                if(member != null && allbooks != null) {
-                    System.out.println("WriteServer");
-                    MemberPackage memberPackage = new MemberPackage(member, allbooks);
-                    socketWrapper.write(memberPackage);System.out.println("kire write koros");
+                if(librarianPackage != null) {
+                    socketWrapper.write(librarianPackage);
                 }
 //            }
         } catch (IOException e) {

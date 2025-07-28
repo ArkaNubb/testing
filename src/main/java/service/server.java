@@ -1,7 +1,6 @@
 package service;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,15 +10,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import book.Book;
-import service.AuthorService;
-import service.BookService;
-import service.LibrarianService;
-import service.MemberService;
-import user.Author;
-import user.Librarian;
-import user.Member;
-import util.SocketWrapper;
+import common.Book;
+import common.Author;
+import common.Librarian;
+import common.Member;
+import common.SocketWrapper;
 
 public class server {
 
@@ -30,7 +25,7 @@ public class server {
     public static Librarian currentLibrarian;
     private ServerSocket serverSocket;
 
-    public HashMap<String, SocketWrapper> clientMap;
+    public static HashMap<String, SocketWrapper> clientMap = new HashMap<>();
 
     server() {
         clientMap = new HashMap<>();
@@ -58,10 +53,10 @@ public class server {
         // Static services to be accessible from all UI controllers
 
         // reading from file;
-        BufferedReader bookInformation = new BufferedReader(new FileReader("src/main/java/Main/bookInformation.txt"));
-        BufferedReader authorInformation = new BufferedReader(new FileReader("src/main/java/Main/authorInformation.txt"));
-        BufferedReader memberInformation = new BufferedReader(new FileReader("src/main/java/Main/memberInformation.txt"));
-        BufferedReader librarianInformation = new BufferedReader(new FileReader("src/main/java/Main/librarianInformation.txt"));
+        BufferedReader bookInformation = new BufferedReader(new FileReader("src/main/java/service/bookInformation.txt"));
+        BufferedReader authorInformation = new BufferedReader(new FileReader("src/main/java/service/authorInformation.txt"));
+        BufferedReader memberInformation = new BufferedReader(new FileReader("src/main/java/service/memberInformation.txt"));
+        BufferedReader librarianInformation = new BufferedReader(new FileReader("src/main/java/service/librarianInformation.txt"));
 
         // reading booklist;
         List<String> bookList = new ArrayList<>();

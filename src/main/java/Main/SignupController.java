@@ -1,6 +1,5 @@
 package Main;
 
-import book.Book;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,9 +8,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import service.server;
-import user.Author;
-import user.Member;
-import user.UserRole;
+import common.Author;
+import common.Member;
+import common.UserRole;
 
 import java.io.IOException;
 import java.util.ArrayList;

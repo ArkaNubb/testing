@@ -1,9 +1,7 @@
 package service;
 
-import common.Authenticate;
-import common.MemberPackage;
-import user.Member;
-import util.SocketWrapper;
+import common.MemberRequest;
+import common.*;
 
 public class ReadThreadServer implements Runnable {
     private Thread thr;
@@ -26,7 +24,28 @@ public class ReadThreadServer implements Runnable {
                     Member member = MemberService.isMemberFound(((Authenticate) obj).getUserId());
                     System.out.println(member);
                     MemberPackage memberPackage = new MemberPackage(member, BookService.getAllBooks());
+                    if(!server.clientMap.containsKey(member.getUserId()))server.clientMap.put( member.getUserId(), socketWrapper);
                     socketWrapper.write(memberPackage);
+                }
+
+                if (obj instanceof LibrarianAuthenticate) {
+                    // send MemberPackage
+                    Librarian librarian = LibrarianService.getLibrarian();
+//                    System.out.println(member);
+                    LibrarianPackage librarianPackage = new LibrarianPackage(librarian, LibrarianService.getPendingIssuingBook(), LibrarianService.getPendingReturnedBook(), LibrarianService.getPendingPublishRequests(), BookService.getAllBooks());
+//                    socketWrapper.write(librarianPackage);
+                    if(!server.clientMap.containsKey(librarian.getUserId()))server.clientMap.put(librarian.getUserId(), socketWrapper);
+                    new WriteThreadServer(socketWrapper, librarianPackage);
+                }
+
+                if(obj instanceof MemberRequest){
+                    MemberRequest memberRequest = (MemberRequest)(obj);
+                    Member currentMember = MemberService.isMemberFound(memberRequest.getUserID());
+                    server.librarianService.requestBorrowedBook(currentMember, memberRequest.getBookID());
+
+                    Librarian librarian = LibrarianService.getLibrarian();
+                    LibrarianPackage librarianPackage = new LibrarianPackage(librarian, LibrarianService.getPendingIssuingBook(), LibrarianService.getPendingReturnedBook(), LibrarianService.getPendingPublishRequests(), BookService.getAllBooks());
+                    if(!server.clientMap.containsKey(librarian.getUserId()))new WriteThreadServer(server.clientMap.get(librarian.getUserId()), librarianPackage);
                 }
             }
         } catch (Exception e) {

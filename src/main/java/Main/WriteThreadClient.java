@@ -1,7 +1,7 @@
 package Main;
 
 import common.Authenticate;
-import util.SocketWrapper;
+import common.SocketWrapper;
 
 public class WriteThreadClient implements Runnable {
 

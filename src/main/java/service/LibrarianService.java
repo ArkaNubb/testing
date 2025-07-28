@@ -1,10 +1,10 @@
 package service;
 
-import book.Book;
-import user.Author;
-import user.Librarian;
-import user.Member;
-import user.Pair;
+import common.Book;
+import common.Author;
+import common.Librarian;
+import common.Member;
+import common.Pair;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,17 +12,35 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class LibrarianService {
-    Librarian librarian;
-    public Map<Member, List<String>> pendingIssuingBook;
-    public Map<Member, List<Pair<String, Double>>> pendingReturnedBook;
-    public Map<Author, List<Book>> pendingPublishRequests;
+    public static Librarian librarian;
+
+    public static Librarian getLibrarian() {
+        return librarian;
+    }
+
+    public LibrarianService() {
+    }
+
+    public static Map<Member, List<String>> pendingIssuingBook  = new HashMap<>();;
+    public static Map<Member, List<Pair<String, Double>>> pendingReturnedBook  = new HashMap<>();;
+    public static Map<Author, List<Book>> pendingPublishRequests  = new HashMap<>();;
+
+    public static Map<Member, List<String>> getPendingIssuingBook() {
+        return pendingIssuingBook;
+    }
+
+    public static Map<Member, List<Pair<String, Double>>> getPendingReturnedBook() {
+        return pendingReturnedBook;
+    }
+
+    public static Map<Author, List<Book>> getPendingPublishRequests() {
+        return pendingPublishRequests;
+    }
+
     public LibrarianService(Librarian librarian) throws IOException {
         this.librarian = librarian;
-
-        pendingIssuingBook = new HashMap<>();
-        pendingReturnedBook = new HashMap<>();
-        BufferedReader readPendingBooks =  new BufferedReader(new FileReader("src\\main\\java\\Main\\librarianPendingBooks.txt"));
-        BufferedReader readPendingReturnBooks =  new BufferedReader(new FileReader("src\\main\\java\\Main\\librarianPendingReturnBooks.txt"));
+        BufferedReader readPendingBooks =  new BufferedReader(new FileReader("src\\main\\java\\service\\librarianPendingBooks.txt"));
+        BufferedReader readPendingReturnBooks =  new BufferedReader(new FileReader("src\\main\\java\\service\\librarianPendingReturnBooks.txt"));
 
         // reading pending Books
         List<String>pendingbookList = new ArrayList<>();
@@ -71,8 +89,8 @@ public class LibrarianService {
         }
 
         // reading author pending books
-        pendingPublishRequests = new HashMap<>();
-        BufferedReader readPendingPublishRequests = new BufferedReader(new FileReader("src\\main\\java\\Main\\authorPendingRequest.txt"));
+//        pendingPublishRequests = new HashMap<>();
+        BufferedReader readPendingPublishRequests = new BufferedReader(new FileReader("src\\main\\java\\service\\authorPendingRequest.txt"));
 
         // Reading pending publish requests
         List<String> pendingPublishList = new ArrayList<>();
@@ -106,7 +124,7 @@ public class LibrarianService {
     public void requestBorrowedBook(Member member, String bookId) throws IOException {
         if(pendingIssuingBook.containsKey(member)){
             pendingIssuingBook.get(member).add(bookId);
-            String filePath = "src\\main\\java\\Main\\librarianPendingBooks.txt";
+            String filePath = "src\\main\\java\\service\\librarianPendingBooks.txt";
             List<String> lines = Files.readAllLines(Paths.get(filePath));
             boolean found = false;
             for (int i = 0; i < lines.size(); i++){
@@ -131,7 +149,7 @@ public class LibrarianService {
             List<String> list = new ArrayList<>();
             list.add(bookId);
             pendingIssuingBook.put(member, list);
-            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\librarianPendingBooks.txt", true));
+            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\librarianPendingBooks.txt", true));
             pendingInformation.write( member.getUserId() + "|" + "dummybook," + bookId + "\n");
             pendingInformation.close();
         }
@@ -139,7 +157,7 @@ public class LibrarianService {
     public void returnBorrowedBook(Member member, String bookId, double rating) throws IOException {
         if(pendingReturnedBook.containsKey(member)){
             pendingReturnedBook.get(member).add(new Pair<>(bookId, rating));
-            String filePath = "src\\main\\java\\Main\\librarianPendingReturnBooks.txt";
+            String filePath = "src\\main\\java\\service\\librarianPendingReturnBooks.txt";
             List<String> lines = Files.readAllLines(Paths.get(filePath));
             boolean found = false;
             for (int i = 0; i < lines.size(); i++){
@@ -164,7 +182,7 @@ public class LibrarianService {
             List<Pair<String, Double>> list = new ArrayList<>();
             list.add(new Pair<>(bookId, rating));
             pendingReturnedBook.put(member, list);
-            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\librarianPendingReturnBooks.txt", true));
+            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\librarianPendingReturnBooks.txt", true));
             pendingInformation.write(member.getUserId() + "|" + "dummybook," + bookId +":"+rating+ "\n");
             pendingInformation.close();
         }
@@ -198,13 +216,13 @@ public class LibrarianService {
 
     private void updatePendingPublishFile(Author author, Book book, boolean isNewAuthor) throws IOException {
         if(isNewAuthor){
-            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorPendingRequest.txt", true));
+            BufferedWriter pendingInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\authorPendingRequest.txt", true));
             String bookData = book.getName() + ":" + book.getBookId()+":"+book.getPublishedDate() + ":" +String.join(",", book.getGenre())+":"+book.getTotal_copies();
             pendingInformation.write(author.getUserId()+"|"+"dummybook;"+bookData+"\n");
             pendingInformation.close();
         }
         else{
-            String filePath="src\\main\\java\\Main\\authorPendingRequest.txt";
+            String filePath="src\\main\\java\\service\\authorPendingRequest.txt";
             List<String> lines=Files.readAllLines(Paths.get(filePath));
             for (int i=0;i<lines.size();i++){
                 if(lines.get(i).contains(author.getUserId() + "|")){
@@ -248,7 +266,7 @@ public class LibrarianService {
             pendingIssuingBook.get(member).remove(bookId);
             // changing member information
 
-            String filePath = "src\\main\\java\\Main\\memberInformation.txt";
+            String filePath = "src\\main\\java\\service\\memberInformation.txt";
             List<String> lines = Files.readAllLines(Paths.get(filePath));
             boolean found = false;
             for (int i = 0; i < lines.size(); i++){
@@ -271,7 +289,7 @@ public class LibrarianService {
 
             //changing book avaibility information
 
-            filePath = "src\\main\\java\\Main\\bookInformation.txt";
+            filePath = "src\\main\\java\\service\\bookInformation.txt";
             lines = Files.readAllLines(Paths.get(filePath));
             found = false;
             for (int i = 0; i < lines.size(); i++){
@@ -289,7 +307,7 @@ public class LibrarianService {
 
             //changing pending books information
 
-            filePath = "src\\main\\java\\Main\\librarianPendingBooks.txt";
+            filePath = "src\\main\\java\\service\\librarianPendingBooks.txt";
             lines = Files.readAllLines(Paths.get(filePath));
             found = false;
             for (int i = 0; i < lines.size(); i++){
@@ -354,7 +372,7 @@ public class LibrarianService {
 
         //changing member information
 
-        String filePath = "src\\main\\java\\Main\\memberInformation.txt";
+        String filePath = "src\\main\\java\\service\\memberInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));
         boolean found = false;
         for (int i = 0; i < lines.size(); i++){
@@ -376,7 +394,7 @@ public class LibrarianService {
         book.setAvailable_copies(book.isAvailable() + 1);
         // changing book avaibility
 
-        filePath = "src\\main\\java\\Main\\bookInformation.txt";
+        filePath = "src\\main\\java\\service\\bookInformation.txt";
         lines = Files.readAllLines(Paths.get(filePath));
         found = false;
         for (int i = 0; i < lines.size(); i++){
@@ -402,7 +420,7 @@ public class LibrarianService {
 
         //changing return book information
 
-        filePath = "src\\main\\java\\Main\\librarianPendingReturnBooks.txt";
+        filePath = "src\\main\\java\\service\\librarianPendingReturnBooks.txt";
         lines = Files.readAllLines(Paths.get(filePath));
         found = false;
         for (int i = 0; i < lines.size(); i++){
@@ -485,7 +503,7 @@ public class LibrarianService {
                 pendingPublishRequests.remove(author);
             }
             // handeled book infooo
-            BufferedWriter bookInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\bookInformation.txt", true));
+            BufferedWriter bookInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\bookInformation.txt", true));
             String bookEntry = "\n" + bookToPublish.getName()+"|"+bookToPublish.getBookId() + "|" +
                     bookToPublish.getPublishedDate()+"|"+bookToPublish.getAuthorName() + "|" +
                     String.join(",",bookToPublish.getGenre())+"|0.0|"+
@@ -499,7 +517,7 @@ public class LibrarianService {
 
             // handled author information file
 
-            String filePath = "src\\main\\java\\Main\\authorInformation.txt";
+            String filePath = "src\\main\\java\\service\\authorInformation.txt";
             List<String> lines = Files.readAllLines(Paths.get(filePath));
             boolean found = false;
             for (int i = 0; i < lines.size(); i++){
@@ -527,7 +545,7 @@ public class LibrarianService {
     }
 
     private void updatePendingPublishRequestsFile() throws IOException {
-        BufferedWriter writer=new BufferedWriter(new FileWriter("src\\main\\java\\Main\\authorPendingRequest.txt"));
+        BufferedWriter writer=new BufferedWriter(new FileWriter("src\\main\\java\\service\\authorPendingRequest.txt"));
 
         for(Author author:pendingPublishRequests.keySet()){
             List<Book> books=pendingPublishRequests.get(author);

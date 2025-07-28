@@ -1,4 +1,4 @@
-package user;
+package common;
 
 public class Pair<K, V>{
     public K first;

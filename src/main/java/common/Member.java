@@ -1,8 +1,6 @@
-package user;
+package common;
 
 
-
-import book.Book;
 
 import java.io.Serializable;
 import java.util.List;

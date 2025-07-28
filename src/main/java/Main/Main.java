@@ -1,32 +1,54 @@
 package Main;
 
-
-
+import common.LibrarianPackage;
 import common.MemberPackage;
+import common.SocketWrapper;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import util.SocketWrapper;
 
 import java.io.IOException;
 
 public class Main extends Application {
     public static SocketWrapper socketWrapper;
     private static MemberPackage memberPackage;
+    public static LibrarianPackage librarianPackage;
 
-    public static void setMemberPackage(MemberPackage mp) {
-        memberPackage = mp;
+    // --- MODIFICATION 1: Add a static reference for the LibrarianController ---
+    private static LibrarianController librarianController;
+
+    public static void setMemberPackage(MemberPackage memberPackage) {
+        Main.memberPackage = memberPackage;
     }
 
     public static MemberPackage getMemberPackage() {
         return memberPackage;
     }
 
-    public Main(){
-
+    public static LibrarianPackage getLibrarianPackage() {
+        return librarianPackage;
     }
+
+    public static void setLibrarianPackage(LibrarianPackage librarianPackage) {
+        Main.librarianPackage = librarianPackage;
+    }
+
+    // --- MODIFICATION 2: Add getter and setter for the controller ---
+    public static LibrarianController getLibrarianController() {
+        return librarianController;
+    }
+
+    public static void setLibrarianController(LibrarianController controller) {
+        Main.librarianController = controller;
+    }
+
+
+    public Main(){
+        // Default constructor
+    }
+
     public Main(String serverAddress, int serverPort) {
         try {
             socketWrapper = new SocketWrapper(serverAddress, serverPort);
@@ -42,14 +64,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-//         The SceneManager will handle all navigation between different screens
         String serverAddress = "localhost";
         int serverPort = 44444;
         new Main(serverAddress, serverPort);
 
         SceneManager.setStage(primaryStage);
 
-        // Load the initial login view
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Main/login-view.fxml"));
         Parent root = loader.load();
 

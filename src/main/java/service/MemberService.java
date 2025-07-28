@@ -1,8 +1,6 @@
 package service;
 
-import book.Book;
-import user.Librarian;
-import user.Member;
+import common.Member;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -49,7 +47,7 @@ public class MemberService {
 
     public void addMember(Member member) throws IOException, IOException {
         allMembers.add(member);
-        BufferedWriter memberInformation = new BufferedWriter(new FileWriter("src\\main\\java\\Main\\memberInformation.txt", true));
+        BufferedWriter memberInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\memberInformation.txt", true));
         memberInformation.write("\n" + member.getEmail() + "|" + member.getUserId() + "|" + member.getPassword() + "|" + member.getName() + "|" + "dummybook");
         memberInformation.close();
     }

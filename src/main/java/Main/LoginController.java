@@ -1,18 +1,12 @@
 package Main;
 
-import common.Authenticate;
-import common.MemberPackage;
+import common.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import service.AuthorService;
 import service.server;
-import user.Author;
-import user.Librarian;
-import user.Member;
-import user.UserRole;
-import util.SocketWrapper;
 
 import java.io.IOException;
 
@@ -43,11 +37,11 @@ public class LoginController {
         try {
             boolean loginSuccess = false;
             String nextScene = "";
-
+            SocketWrapper socketWrapper;
             switch (role) {
                 case MEMBER:
 //                    Member member = MemberService.isMemberFound(userId);
-                    SocketWrapper socketWrapper = Main.getSocketWrapper();
+                    socketWrapper = Main.getSocketWrapper();
                     if (socketWrapper == null) {
                         errorLabel.setText("Connection to server not established.");
                         return;
@@ -58,9 +52,6 @@ public class LoginController {
 
                     // Write to the server directly. No new thread needed for this.
                     socketWrapper.write(authenticate);
-
-                    // **Crucial Change**: Wait for the ReadThreadClient to receive the data.
-                    // This simple loop waits up to a few seconds for the response.
                     for (int i = 0; i < 100; i++) {
                         if (Main.getMemberPackage() != null) {
                             break;
@@ -86,7 +77,31 @@ public class LoginController {
                     }
                     break;
                 case LIBRARIAN:
-                    Librarian librarian = server.currentLibrarian;
+
+                    socketWrapper = Main.getSocketWrapper();
+                    if (socketWrapper == null) {
+                        errorLabel.setText("Connection to server not established.");
+                        return;
+                    }
+
+                    LibrarianAuthenticate librarianAuthenticate = new LibrarianAuthenticate(userId, password);
+                    Main.setLibrarianPackage(null);
+
+
+                    // Write to the server directly. No new thread needed for this.
+                    socketWrapper.write(librarianAuthenticate);
+                    for (int i = 0; i < 100; i++) {
+                        if (Main.getLibrarianPackage() != null) {
+                            System.out.println("yeeee");
+                            break;
+                        }
+                        Thread.sleep(50); // Pause briefly to allow the reader thread to work
+                    }
+
+                    LibrarianPackage librarianPackage = Main.getLibrarianPackage();
+                    Librarian librarian = null;
+                    if(librarianPackage != null) librarian = librarianPackage.getLibrarian();
+                    System.out.println(librarian.getName());
                     if (librarian.getUserId().equals(userId) && librarian.getPassword().equals(password)) {
                         SceneManager.setCurrentUser(librarian);
                         loginSuccess = true;

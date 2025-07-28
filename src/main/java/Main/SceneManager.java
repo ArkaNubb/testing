@@ -3,7 +3,7 @@ package Main;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
-import user.user;
+import common.user;
 
 import java.io.IOException;
 
