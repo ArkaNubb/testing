@@ -24,11 +24,6 @@ public class SceneManager {
         return currentUser;
     }
 
-    /**
-     * Switches the current scene to the one specified by the FXML file.
-     * @param fxmlFile The path to the FXML file (e.g., "/Main/librarian-view.fxml")
-     * @throws IOException If the FXML file cannot be loaded.
-     */
     public static void switchScene(String fxmlFile) throws IOException {
         FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource(fxmlFile));
         Parent parent = loader.load();

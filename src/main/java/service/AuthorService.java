@@ -33,7 +33,7 @@ public class AuthorService {
 
     public void RemoveBook(Book book) throws IOException {
         author.removeBook(book);
-
+        BookService.removeBookFromBookService(book);
         // changing author information
         String filePath = "src\\main\\java\\Main\\authorInformation.txt";
         List<String> lines = Files.readAllLines(Paths.get(filePath));

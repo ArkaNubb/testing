@@ -6,30 +6,36 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import service.AuthorService;
 import user.Author;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class AuthorController {
 
     private Author currentAuthor;
-    @FXML private Button logoutButton;
+    private AuthorService authorService; // Service instance for the current author
 
     @FXML private Label welcomeLabel;
     @FXML private Label publishMessageLabel;
+    @FXML private Label removeMessageLabel;
 
-    // My Books Table
     @FXML private TableView<Book> myBooksTable;
     @FXML private TableColumn<Book, String> bookTitleCol;
     @FXML private TableColumn<Book, String> bookIdCol;
     @FXML private TableColumn<Book, String> bookDateCol;
     @FXML private TableColumn<Book, Number> bookRatingCol;
 
-    // Publish Form
     @FXML private TextField titleField;
     @FXML private TextField dateField;
     @FXML private TextField genresField;
@@ -40,13 +46,13 @@ public class AuthorController {
         currentAuthor = (Author) SceneManager.getCurrentUser();
         if (currentAuthor != null) {
             welcomeLabel.setText("Welcome, " + currentAuthor.getName());
+            authorService = new AuthorService(currentAuthor);
         }
         setupTable();
         loadData();
     }
 
     private void setupTable() {
-        // Use callbacks to get data from standard getters
         bookTitleCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
         bookIdCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookId()));
         bookDateCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPublishedDate()));
@@ -55,7 +61,9 @@ public class AuthorController {
 
     private void loadData() {
         if (currentAuthor != null) {
+            // This requires the getPublishedBooks() method which you already have in Author.java
             myBooksTable.setItems(FXCollections.observableArrayList(currentAuthor.getPublishedBooks()));
+            myBooksTable.refresh();
         }
     }
 
@@ -81,7 +89,6 @@ public class AuthorController {
             Main.librarianService.requestPublishBook(currentAuthor, newBook);
             publishMessageLabel.setText("Publish request sent for '" + title + "'. Awaiting librarian approval.");
 
-            // Clear form fields
             titleField.clear();
             dateField.clear();
             genresField.clear();
@@ -94,12 +101,38 @@ public class AuthorController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    void handleRemoveBook(ActionEvent event) {
+        Book selectedBook = myBooksTable.getSelectionModel().getSelectedItem();
+        removeMessageLabel.setText("");
+
+        if (selectedBook == null) {
+            removeMessageLabel.setText("Please select a book to remove.");
+            return;
+        }
+
+        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmationAlert.setTitle("Confirm Removal");
+        confirmationAlert.setHeaderText("Remove '" + selectedBook.getName() + "'?");
+        confirmationAlert.setContentText("Are you sure you want to permanently remove this book from the library system?");
+
+        Optional<ButtonType> result = confirmationAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                authorService.RemoveBook(selectedBook);
+                removeMessageLabel.setText("Book '" + selectedBook.getName() + "' has been removed.");
+                loadData();
+            } catch (IOException e) {
+                removeMessageLabel.setText("Error removing book. Please check file permissions.");
+                e.printStackTrace();
+            }
+        }
+    }
+
     @FXML
     void handleLogout(ActionEvent event) throws IOException {
-        // Clear the currently logged-in user's data
         SceneManager.setCurrentUser(null);
-
-        // Switch the scene back to the login view
         SceneManager.switchScene("/Main/login-view.fxml");
     }
 }

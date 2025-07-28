@@ -9,23 +9,23 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.layout.Pane?>
 <BorderPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.LibrarianController">
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="10" style="-fx-background-color: #37474F; -fx-border-color: #263238; -fx-border-width: 0 0 2 0;">
             <padding>
                 <Insets left="20" right="20" />
             </padding>
-            <Label fx:id="welcomeLabel" text="Dashboard" textFill="white">
+            <Label fx:id="welcomeLabel" text="Librarian Dashboard" textFill="white">
                 <font>
                     <Font name="System Bold" size="18.0" />
                 </font>
             </Label>
-            <Pane HBox.hgrow="ALWAYS" />
-            <Button fx:id="logoutButton" onAction="#handleLogout" style="-fx-background-color: #d9534f; -fx-text-fill: white;" text="Logout" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleLogout" text="Logout" style="-fx-background-color: #f44336; -fx-text-fill: white;" />
         </HBox>
     </top>
     <center>

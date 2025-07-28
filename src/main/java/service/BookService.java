@@ -5,7 +5,7 @@ import book.Book;
 import java.util.List;
 
 public class BookService {
-    protected static List<Book> allBooks;
+    private static List<Book> allBooks;
     public BookService(List<Book> allBooks){
         this.allBooks = allBooks;
     }
@@ -27,4 +27,8 @@ public class BookService {
     public static List<Book> getAllBooks() {
         return allBooks;
     }
+    public static void removeBookFromBookService(Book book){
+        allBooks.remove(book);
+    }
+
 }
