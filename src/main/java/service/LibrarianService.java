@@ -473,15 +473,15 @@ public class LibrarianService {
     }
 
     public void approvePublishRequest(String authorUserId, String bookId) throws IOException {
-        Author author=null;
-        Book bookToPublish=null;
+        Author authorFromPending = null;
+        Book bookToPublish = null;
 
-        // Find the author and book
-        for(Author a : pendingPublishRequests.keySet()){
-            if(a.getUserId().equals(authorUserId)){
-                author = a;
-                for(Book book : pendingPublishRequests.get(a)){
-                    if(book.getBookId().equals(bookId)){
+        // Find the author and book from the pending requests map
+        for (Author a : pendingPublishRequests.keySet()) {
+            if (a.getUserId().equals(authorUserId)) {
+                authorFromPending = a;
+                for (Book book : pendingPublishRequests.get(a)) {
+                    if (book.getBookId().equals(bookId)) {
                         bookToPublish = book;
                         break;
                     }
@@ -489,58 +489,70 @@ public class LibrarianService {
                 break;
             }
         }
-        // baachal handling....
-        if(author!=null && bookToPublish!=null){
-            BookService.addBookToSystem(bookToPublish);
-            author.addPublishedBooks(bookToPublish);
 
-            // Remove from pending requests
-            pendingPublishRequests.get(author).remove(bookToPublish);
-            if(pendingPublishRequests.get(author).isEmpty()){
-                pendingPublishRequests.remove(author);
+        // Proceed if the request is valid
+        if (authorFromPending != null && bookToPublish != null) {
+            // --- FIX: Get the definitive author object from AuthorService ---
+            Author masterAuthor = AuthorService.getAuthor(authorUserId);
+            if (masterAuthor == null) {
+                System.out.println("CRITICAL ERROR: Master author object not found for ID: " + authorUserId);
+                return;
             }
-            // handeled book infooo
-            BufferedWriter bookInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\bookInformation.txt", true));
-            String bookEntry = "\n" + bookToPublish.getName()+"|"+bookToPublish.getBookId() + "|" +
-                    bookToPublish.getPublishedDate()+"|"+bookToPublish.getAuthorName() + "|" +
-                    String.join(",",bookToPublish.getGenre())+"|0.0|"+
-                    bookToPublish.getTotal_copies()+"|"+bookToPublish.isAvailable();
-            bookInformation.write(bookEntry);
-            bookInformation.close();
 
-            updatePendingPublishRequestsFile();
-            System.out.println("Book publishing request approved");
-            System.out.println("Book '" + bookToPublish.getName() +" 'is now available in the library.");
+            try {
+                // Perform state changes
+                BookService.addBookToSystem(bookToPublish);
 
-            // handled author information file
+                // --- FIX: Update the definitive master author object ---
+                masterAuthor.addPublishedBooks(bookToPublish);
 
-            String filePath = "src\\main\\java\\service\\authorInformation.txt";
-            List<String> lines = Files.readAllLines(Paths.get(filePath));
-            boolean found = false;
-            for (int i = 0; i < lines.size(); i++){
-                if(lines.get(i).contains("|" + author.getUserId()+"|")){
-                    found = true;
-                    String[] parts = lines.get(i).split("\\|");
-                    String[] books = parts[4].split(",");
-
-                    List<String> bookList = new ArrayList<>(Arrays.asList(books));
-                    String updatedBooks = String.join(",", bookList);
-                    if (!bookId.isEmpty()) {
-                        updatedBooks += (updatedBooks.isEmpty() ? "" : ",") + bookId;
-                    }
-                    parts[4] = updatedBooks;
-                    lines.set(i, String.join("|", parts));
-                    break;
+                // Now, remove the request from the pending map
+                pendingPublishRequests.get(authorFromPending).remove(bookToPublish);
+                if (pendingPublishRequests.get(authorFromPending).isEmpty()) {
+                    pendingPublishRequests.remove(authorFromPending);
                 }
+
+                // Perform all file I/O operations
+                try (BufferedWriter bookInformation = new BufferedWriter(new FileWriter("src\\main\\java\\service\\bookInformation.txt", true))) {
+                    String bookEntry = "\n" + bookToPublish.getName() + "|" + bookToPublish.getBookId() + "|" +
+                            bookToPublish.getPublishedDate() + "|" + bookToPublish.getAuthorName() + "|" +
+                            String.join(",", bookToPublish.getGenre()) + "|0.0|" +
+                            bookToPublish.getTotal_copies() + "|" + bookToPublish.isAvailable();
+                    bookInformation.write(bookEntry);
+                }
+
+                String authorInfoPath = "src\\main\\java\\service\\authorInformation.txt";
+                List<String> authorLines = Files.readAllLines(Paths.get(authorInfoPath));
+                for (int i = 0; i < authorLines.size(); i++) {
+                    if (authorLines.get(i).contains("|" + masterAuthor.getUserId() + "|")) {
+                        String[] parts = authorLines.get(i).split("\\|");
+                        String currentBooks = parts[4].replace("dummybook", "").trim();
+                        if(currentBooks.isEmpty() || currentBooks.equals(",")) {
+                            currentBooks = bookId;
+                        } else {
+                            currentBooks += "," + bookId;
+                        }
+                        parts[4] = currentBooks;
+                        authorLines.set(i, String.join("|", parts));
+                        break;
+                    }
+                }
+                Files.write(Paths.get(authorInfoPath), authorLines);
+                updatePendingPublishRequestsFile();
+                System.out.println("Book '" + bookToPublish.getName() + "' approved and added to the library.");
+
+            } catch (IOException e) {
+                System.out.println("!! CRITICAL ERROR during file write for book approval: " + e.getMessage());
+            } finally {
+                // This broadcast block now sends the correctly updated masterAuthor object
+                System.out.println("Broadcasting updates for publication approval...");
+                broadcastLibrarianUpdate();       // Updates the librarian's view
+                broadcastAuthorUpdate(authorUserId); // Updates the author's view
+                broadcastToAllMembers();          // Updates all members
             }
-            Files.write(Paths.get(filePath), lines);
+        } else {
+            System.out.println("Invalid author ID or book ID for approval.");
         }
-        else{
-            System.out.println("Invalid author ID or book ID.");
-        }
-
-        broadcastLibrarianUpdate();
-
     }
 
     private void updatePendingPublishRequestsFile() throws IOException {
@@ -570,85 +582,57 @@ public class LibrarianService {
     // FIXED: Enhanced broadcast method with better debugging and error handling
     // In LibrarianService.java
 
-    private void broadcastLibrarianUpdate() {
+    public static void broadcastLibrarianUpdate() {
         try {
-            System.out.println("🔄 Starting broadcastLibrarianUpdate...");
-            Librarian currentLibrarian = LibrarianService.getLibrarian();
-            if (currentLibrarian == null) {
-                System.out.println("❌ ERROR: Librarian is null - cannot broadcast");
-                return;
+            Librarian currentLibrarian = getLibrarian();
+            if (currentLibrarian != null && server.clientMap.containsKey(currentLibrarian.getUserId())) {
+                LibrarianPackage pkg = new LibrarianPackage(currentLibrarian, getPendingIssuingBook(), getPendingReturnedBook(), getPendingPublishRequests(), BookService.getAllBooks());
+                server.clientMap.get(currentLibrarian.getUserId()).write(pkg);
+                System.out.println("--> Librarian update sent.");
             }
-
-            String librarianUserId = currentLibrarian.getUserId();
-            if (server.clientMap.containsKey(librarianUserId)) {
-                System.out.println("✅ Librarian found in clientMap - preparing broadcast...");
-
-                LibrarianPackage librarianPackage = new LibrarianPackage(
-                        currentLibrarian,
-                        LibrarianService.getPendingIssuingBook(),
-                        LibrarianService.getPendingReturnedBook(),
-                        LibrarianService.getPendingPublishRequests(),
-                        BookService.getAllBooks()
-                );
-
-                SocketWrapper librarianSocket = server.clientMap.get(librarianUserId);
-
-                // --- FIX: Write directly to the socket instead of creating a new thread ---
-                librarianSocket.write(librarianPackage);
-
-                System.out.println("✅ Real-time update sent to librarian successfully!");
-
-            } else {
-                System.out.println("ℹ️  Librarian '" + librarianUserId + "' not found in clientMap");
-            }
-        } catch (Exception e) {
-            System.out.println("❌ ERROR in broadcastLibrarianUpdate: " + e.getMessage());
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    private void broadcastMemberUpdate(String memberUserId) {
+    public static void broadcastMemberUpdate(String memberUserId) {
         try {
-            System.out.println("🔄 Broadcasting member update to: " + memberUserId);
-
             if (server.clientMap.containsKey(memberUserId)) {
                 Member updatedMember = MemberService.isMemberFound(memberUserId);
                 if (updatedMember != null) {
-                    MemberPackage memberPackage = new MemberPackage(updatedMember, BookService.getAllBooks());
-
-                    SocketWrapper memberSocket = server.clientMap.get(memberUserId);
-                    memberSocket.write(memberPackage);
-
-                    System.out.println("✅ Real-time update sent to member: " + memberUserId);
+                    MemberPackage pkg = new MemberPackage(updatedMember, BookService.getAllBooks());
+                    server.clientMap.get(memberUserId).write(pkg);
+                    System.out.println("--> Member update sent to " + memberUserId);
                 }
-            } else {
-                System.out.println("ℹ️  Member '" + memberUserId + "' not found in clientMap");
             }
-        } catch (Exception e) {
-            System.out.println("❌ ERROR in broadcastMemberUpdate: " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    public static void broadcastToAllMembers() {
+        System.out.println("Broadcasting to all connected members...");
+        for (String userId : server.clientMap.keySet()) {
+            if (MemberService.isMemberFound(userId) != null) {
+                broadcastMemberUpdate(userId);
+            }
         }
     }
 
-    /**
-     * Broadcast to all connected members (useful when book availability changes)
-     */
-    private void broadcastToAllMembers() {
+    public static void broadcastAuthorUpdate(String authorUserId) {
         try {
-            System.out.println("🔄 Broadcasting updates to all connected members...");
-
-            for (String userId : server.clientMap.keySet()) {
-                Member member = MemberService.isMemberFound(userId);
-                if (member != null) {
-                    // This is a member, not a librarian
-                    broadcastMemberUpdate(userId);
+            if (server.clientMap.containsKey(authorUserId)) {
+                Author updatedAuthor = AuthorService.getAuthor(authorUserId);
+                if (updatedAuthor != null) {
+                    AuthorPackage pkg = new AuthorPackage(updatedAuthor);
+                    server.clientMap.get(authorUserId).write(pkg);
+                    System.out.println("--> Author update sent to " + authorUserId);
                 }
             }
-
-            System.out.println("✅ Broadcast to all members completed");
-        } catch (Exception e) {
-            System.out.println("❌ ERROR in broadcastToAllMembers: " + e.getMessage());
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
+
+    public static void broadcastAuthorActionResults(String authorUserId) {
+        System.out.println("Broadcasting author action results for " + authorUserId);
+        broadcastAuthorUpdate(authorUserId);
+        broadcastLibrarianUpdate();
+        broadcastToAllMembers();
+    }
+
 }

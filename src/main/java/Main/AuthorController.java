@@ -1,31 +1,38 @@
 package Main;
 
 import common.Book;
+import common.Author;
+import common.AuthorRequest;
+import common.LogoutRequest;
+import common.SocketWrapper;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import service.AuthorService;
 import service.server;
-import common.Author;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class AuthorController {
+public class AuthorController implements Initializable {
 
     private Author currentAuthor;
-    private AuthorService authorService; // Service instance for the current author
+    private final ObservableList<Book> myBooksData = FXCollections.observableArrayList();
 
     @FXML private Label welcomeLabel;
     @FXML private Label publishMessageLabel;
@@ -42,14 +49,15 @@ public class AuthorController {
     @FXML private TextField genresField;
     @FXML private TextField copiesField;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
         currentAuthor = (Author) SceneManager.getCurrentUser();
         if (currentAuthor != null) {
             welcomeLabel.setText("Welcome, " + currentAuthor.getName());
-            authorService = new AuthorService(currentAuthor);
         }
         setupTable();
+
+        Main.setAuthorController(this);
         loadData();
     }
 
@@ -58,16 +66,28 @@ public class AuthorController {
         bookIdCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookId()));
         bookDateCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPublishedDate()));
         bookRatingCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getRating()));
+        myBooksTable.setItems(myBooksData);
     }
 
-    private void loadData() {
-        if (currentAuthor != null) {
-            // This requires the getPublishedBooks() method which you already have in Author.java
-            myBooksTable.setItems(FXCollections.observableArrayList(currentAuthor.getPublishedBooks()));
+    public void loadData() {
+        Platform.runLater(() -> {
+            System.out.println("=== Refreshing Author UI ===");
+            myBooksData.clear();
+            if (Main.getAuthorPackage() != null) {
+                Author updatedAuthor = Main.getAuthorPackage().getAuthor();
+                if (updatedAuthor != null && updatedAuthor.getPublishedBooks() != null) {
+                    myBooksData.addAll(updatedAuthor.getPublishedBooks());
+                    currentAuthor = updatedAuthor;
+                }
+            } else if (currentAuthor != null && currentAuthor.getPublishedBooks() != null) {
+                myBooksData.addAll(currentAuthor.getPublishedBooks());
+            }
             myBooksTable.refresh();
-        }
+            System.out.println("=== Author UI Update Complete ===");
+        });
     }
 
+    // --- UPDATED METHOD ---
     @FXML
     void handlePublishRequest(ActionEvent event) {
         String title = titleField.getText();
@@ -82,23 +102,43 @@ public class AuthorController {
 
         try {
             int copies = Integer.parseInt(copiesStr);
-            List<String> genres = Arrays.asList(genresStr.split(","));
-            String bookId = server.authorService.generateBookId();
+            if (copies <= 0) {
+                publishMessageLabel.setText("Number of copies must be positive.");
+                return;
+            }
 
-            Book newBook = new Book(title, bookId, date, currentAuthor.getName(), genres, new ArrayList<>(), copies, copies);
+            List<String> genres = new ArrayList<>(Arrays.asList(genresStr.split(",")));
+            genres.replaceAll(String::trim);
 
-            server.librarianService.requestPublishBook(currentAuthor, newBook);
-            publishMessageLabel.setText("Publish request sent for '" + title + "'. Awaiting librarian approval.");
+            // CORRECTED: Do NOT generate the Book ID on the client.
+            // The server will do this.
 
-            titleField.clear();
-            dateField.clear();
-            genresField.clear();
-            copiesField.clear();
+            SocketWrapper socketWrapper = Main.getSocketWrapper();
+            if (socketWrapper != null) {
+                // Use the new constructor that doesn't require a bookId
+                AuthorRequest publishRequest = new AuthorRequest(
+                        currentAuthor.getUserId(),
+                        title,
+                        date,
+                        genres,
+                        copies
+                );
+
+                socketWrapper.write(publishRequest);
+                publishMessageLabel.setText("Publish request sent for '" + title + "'. Awaiting librarian approval.");
+
+                titleField.clear();
+                dateField.clear();
+                genresField.clear();
+                copiesField.clear();
+            } else {
+                publishMessageLabel.setText("Connection to server not established.");
+            }
 
         } catch (NumberFormatException e) {
-            publishMessageLabel.setText("Invalid number for copies.");
+            publishMessageLabel.setText("Invalid number for copies. Please enter a valid number.");
         } catch (IOException e) {
-            publishMessageLabel.setText("Error sending publish request.");
+            publishMessageLabel.setText("Error sending publish request to server.");
             e.printStackTrace();
         }
     }
@@ -121,18 +161,44 @@ public class AuthorController {
         Optional<ButtonType> result = confirmationAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                authorService.RemoveBook(selectedBook);
-                removeMessageLabel.setText("Book '" + selectedBook.getName() + "' has been removed.");
-                loadData();
+                SocketWrapper socketWrapper = Main.getSocketWrapper();
+                if (socketWrapper != null) {
+                    AuthorRequest removeRequest = new AuthorRequest(
+                            currentAuthor.getUserId(),
+                            selectedBook.getBookId(),
+                            AuthorRequest.REMOVE_BOOK
+                    );
+
+                    socketWrapper.write(removeRequest);
+                    removeMessageLabel.setText("Remove request sent for '" + selectedBook.getName() + "'.");
+                } else {
+                    removeMessageLabel.setText("Connection to server not established.");
+                }
+
             } catch (IOException e) {
-                removeMessageLabel.setText("Error removing book. Please check file permissions.");
+                removeMessageLabel.setText("Error sending remove request to server.");
                 e.printStackTrace();
             }
         }
     }
 
     @FXML
+    void handleRefresh(ActionEvent event) {
+        System.out.println("Manual refresh triggered for author");
+        loadData();
+    }
+
+    @FXML
     void handleLogout(ActionEvent event) throws IOException {
+        if (SceneManager.getCurrentUser() != null) {
+            SocketWrapper socketWrapper = Main.getSocketWrapper();
+            if (socketWrapper != null) {
+                LogoutRequest logoutRequest = new LogoutRequest(SceneManager.getCurrentUser().getUserId());
+                socketWrapper.write(logoutRequest);
+            }
+        }
+        Main.setAuthorController(null);
+        Main.setAuthorPackage(null);
         SceneManager.setCurrentUser(null);
         SceneManager.switchScene("/Main/login-view.fxml");
     }

@@ -253,7 +253,6 @@ public class LibrarianController implements Initializable {
         if (selected != null) {
             System.out.println("Approving issue request: " + selected.getMemberId() + " -> " + selected.getBookId());
             MemberRequest memberRequest = new MemberRequest(selected.getBookId(), selected.getMemberId(), 3);
-//            server.librarianService.approveBook(selected.getMemberId(), selected.getBookId());
             Main.getSocketWrapper().write(memberRequest);
         } else {
             System.out.println("No issue request selected");
@@ -265,18 +264,22 @@ public class LibrarianController implements Initializable {
         if (selected != null) {
             System.out.println("Accepting return request: " + selected.getMemberId() + " -> " + selected.getBookId());
             MemberRequest memberRequest = new MemberRequest(selected.getBookId(), selected.getMemberId(), 4);
-//            server.librarianService.acceptBook(selected.getMemberId(), selected.getBookId());
             Main.getSocketWrapper().write(memberRequest);
         } else {
             System.out.println("No return request selected");
         }
     }
 
+    // --- UPDATED METHOD ---
     @FXML void handleApprovePublication(ActionEvent event) throws IOException {
         PublishRequest selected = publishRequestsTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            System.out.println("Approving publication request: " + selected.getAuthorId() + " -> " + selected.getBookId());
-            server.librarianService.approvePublishRequest(selected.getAuthorId(), selected.getBookId());
+            System.out.println("Sending publication approval request for: " + selected.getAuthorId() + " -> " + selected.getBookId());
+
+            // CORRECTED: Create a request object and send it through the socket.
+            AuthorRequest approvalRequest = new AuthorRequest(selected.getAuthorId(), selected.getBookId(), AuthorRequest.APPROVE_PUBLICATION);
+            Main.getSocketWrapper().write(approvalRequest);
+
         } else {
             System.out.println("No publication request selected");
         }

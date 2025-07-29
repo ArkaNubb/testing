@@ -69,7 +69,30 @@ public class LoginController {
                     }
                     break;
                 case AUTHOR:
-                    Author author = AuthorService.isAuthorFound(userId);
+//                    Author author = AuthorService.isAuthorFound(userId);
+                    socketWrapper = Main.getSocketWrapper();
+                    if (socketWrapper == null) {
+                        errorLabel.setText("Connection to server not established.");
+                        return;
+                    }
+                    AuthorAuthenticate authorAuthenticate = new AuthorAuthenticate(userId, password);
+                    Main.setAuthorPackage(null);
+
+                    socketWrapper.write(authorAuthenticate);
+                    for (int i = 0; i < 100; i++) {
+                        if (Main.getAuthorPackage() != null) {
+                            System.out.println("AuthorPackage received");
+                            break;
+                        }
+                        Thread.sleep(50); // Pause briefly to allow the reader thread to work
+                    }
+
+                    AuthorPackage authorPackage = Main.getAuthorPackage();
+                    Author author = null;
+                    if(authorPackage != null) {
+                        author = authorPackage.getAuthor();
+                    }
+
                     if (author != null && author.getPassword().equals(password)) {
                         SceneManager.setCurrentUser(author);
                         loginSuccess = true;

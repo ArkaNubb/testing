@@ -2,8 +2,8 @@ package service;
 
 import common.MemberRequest;
 import common.*;
-
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ReadThreadServer implements Runnable {
     private Thread thr;
@@ -16,9 +16,7 @@ public class ReadThreadServer implements Runnable {
     }
 
     private void cleanupDisconnectedClient() {
-        // Remove this socket from the client map
         server.clientMap.entrySet().removeIf(entry -> entry.getValue() == socketWrapper);
-        System.out.println("🧹 Cleaned up disconnected client from map");
     }
 
     public void run() {
@@ -53,34 +51,89 @@ public class ReadThreadServer implements Runnable {
                     }
                 }
 
-                if (obj instanceof MemberRequest) {
-                    MemberRequest memberRequest = (MemberRequest) obj;
-                    Member currentMember = MemberService.isMemberFound(memberRequest.getUserID());
-
-                    if (currentMember != null) {
-                        try {
-                            // Process the request - this will trigger broadcastLibrarianUpdate() internally
-                            if(memberRequest.getChoice() == 1)server.librarianService.requestBorrowedBook(currentMember, memberRequest.getBookID());
-                            if(memberRequest.getChoice() == 2)server.librarianService.returnBorrowedBook(currentMember, memberRequest.getBookID(), memberRequest.getRating());
-                            if(memberRequest.getChoice() == 3){
-//                                System.out.println("hellooooo");
-                                server.librarianService.approveBook(memberRequest.getUserID(), memberRequest.getBookID());
-                            }
-                            if(memberRequest.getChoice() == 4){
-                                server.librarianService.acceptBook(memberRequest.getUserID(), memberRequest.getBookID());
-
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                if (obj instanceof AuthorAuthenticate) {
+                    AuthorAuthenticate authorAuthenticate = (AuthorAuthenticate)obj;
+                    Author author = AuthorService.getAuthor(authorAuthenticate.getUserId());
+                    if (author != null && author.getPassword().equals(authorAuthenticate.getPassWord())) {
+                        AuthorPackage authorPackage = new AuthorPackage(author);
+                        if (!server.clientMap.containsKey(author.getUserId())) {
+                            server.clientMap.put(author.getUserId(), socketWrapper);
                         }
+                        socketWrapper.write(authorPackage);
+                        System.out.println("Author authenticated successfully: " + author.getName());
+                    } else {
+                        System.out.println("Author authentication failed for userId: " + authorAuthenticate.getUserId());
                     }
                 }
+
+                if (obj instanceof MemberRequest) {
+                    MemberRequest memberRequest = (MemberRequest) obj;
+                    if(memberRequest.getChoice() == 1) {
+                        server.librarianService.requestBorrowedBook(MemberService.isMemberFound(memberRequest.getUserID()), memberRequest.getBookID());
+                    } else if(memberRequest.getChoice() == 2) {
+                        server.librarianService.returnBorrowedBook(MemberService.isMemberFound(memberRequest.getUserID()), memberRequest.getBookID(), memberRequest.getRating());
+                    } else if(memberRequest.getChoice() == 3) {
+                        server.librarianService.approveBook(memberRequest.getUserID(), memberRequest.getBookID());
+                    } else if(memberRequest.getChoice() == 4){
+                        server.librarianService.acceptBook(memberRequest.getUserID(), memberRequest.getBookID());
+                    }
+                }
+
+                if (obj instanceof AuthorRequest) {
+                    AuthorRequest authorRequest = (AuthorRequest) obj;
+                    try {
+                        System.out.println("Processing author request of type: " + authorRequest.getRequestType());
+
+                        if (authorRequest.getRequestType() == AuthorRequest.PUBLISH_BOOK) {
+                            Author currentAuthor = AuthorService.getAuthor(authorRequest.getAuthorId());
+                            if (currentAuthor != null) {
+                                // CORRECTED: Generate the Book ID on the server
+                                String newBookId = server.authorService.generateBookId();
+                                System.out.println("Generated new Book ID: " + newBookId + " for title: " + authorRequest.getBookTitle());
+
+                                Book newBook = new Book(
+                                        authorRequest.getBookTitle(),
+                                        newBookId, // Use the new server-generated ID
+                                        authorRequest.getPublishedDate(),
+                                        currentAuthor.getName(),
+                                        authorRequest.getGenres(),
+                                        new ArrayList<>(),
+                                        authorRequest.getTotalCopies(),
+                                        authorRequest.getTotalCopies()
+                                );
+                                server.librarianService.requestPublishBook(currentAuthor, newBook);
+                            }
+
+                        } else if (authorRequest.getRequestType() == AuthorRequest.REMOVE_BOOK) {
+                            Author currentAuthor = AuthorService.getAuthor(authorRequest.getAuthorId());
+                            if (currentAuthor != null) {
+                                System.out.println("Processing remove request for book ID: " + authorRequest.getBookId());
+                                Book bookToRemove = BookService.findBook(authorRequest.getBookId());
+                                if (bookToRemove != null) {
+                                    AuthorService authorService = new AuthorService(currentAuthor);
+                                    authorService.RemoveBook(bookToRemove);
+                                    // This broadcast is specific to removing a book
+                                    LibrarianService.broadcastAuthorActionResults(currentAuthor.getUserId());
+                                }
+                            }
+                        } else if (authorRequest.getRequestType() == AuthorRequest.APPROVE_PUBLICATION) {
+                            System.out.println("Processing approval for book ID: " + authorRequest.getBookId());
+                            server.librarianService.approvePublishRequest(authorRequest.getAuthorId(), authorRequest.getBookId());
+                        }
+
+                    } catch (Exception e) {
+                        System.out.println("Error processing author request: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+
                 if (obj instanceof LogoutRequest) {
                     LogoutRequest logoutRequest = (LogoutRequest) obj;
                     server.clientMap.remove(logoutRequest.getUserId());
                 }
             }
         } catch (Exception e) {
+            System.out.println("A client has disconnected.");
             cleanupDisconnectedClient();
         }
     }
