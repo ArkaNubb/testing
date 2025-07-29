@@ -7,24 +7,154 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.LoginController">
-    <children>
-        <Label text="Library Login">
-            <font>
-                <Font name="System Bold" size="24.0" />
-            </font>
-        </Label>
-        <ChoiceBox fx:id="roleChoiceBox" prefWidth="250.0" />
-        <TextField fx:id="userIdField" maxWidth="250.0" promptText="User ID" />
-        <PasswordField fx:id="passwordField" maxWidth="250.0" promptText="Password" />
-        <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLogin" prefWidth="100.0" text="Login" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-        <Label fx:id="errorLabel" textFill="RED" />
-        <Hyperlink onAction="#handleSignupLink" text="Don't have an account? Sign up" />
-    </children>
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-</VBox>
+<StackPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="Main.LoginController"
+           style="-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);">
+
+    <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+          minHeight="-Infinity" minWidth="-Infinity"
+          prefHeight="500.0" prefWidth="400.0" spacing="25.0"
+          style="-fx-background-color: rgba(255, 255, 255, 0.95);
+                 -fx-background-radius: 20;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 10);">
+
+        <padding>
+            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+        </padding>
+
+        <children>
+            <!-- Header Section -->
+            <VBox alignment="CENTER" spacing="10.0">
+                <Label text="📚" style="-fx-font-size: 48px;" />
+                <Label text="Library Portal">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                    <style>
+                        -fx-text-fill: #2c3e50;
+                    </style>
+                </Label>
+                <Label text="Welcome back! Please sign in to continue.">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                    <style>
+                        -fx-text-fill: #7f8c8d;
+                    </style>
+                </Label>
+            </VBox>
+
+            <!-- Form Section -->
+            <VBox spacing="20.0" prefWidth="300.0">
+
+                <!-- Role Selection -->
+                <VBox spacing="8.0">
+                    <Label text="Login as:">
+                        <font>
+                            <Font name="System Bold" size="12.0" />
+                        </font>
+                        <style>
+                            -fx-text-fill: #34495e;
+                        </style>
+                    </Label>
+                    <ChoiceBox fx:id="roleChoiceBox" prefWidth="300.0" prefHeight="45.0"
+                               style="-fx-background-color: #f8f9fa;
+                                      -fx-border-color: #e1e8ed;
+                                      -fx-border-width: 2;
+                                      -fx-border-radius: 10;
+                                      -fx-background-radius: 10;
+                                      -fx-font-size: 14px;
+                                      -fx-padding: 0 15 0 15;" />
+                </VBox>
+
+                <!-- User ID Field -->
+                <VBox spacing="8.0">
+                    <Label text="User ID:">
+                        <font>
+                            <Font name="System Bold" size="12.0" />
+                        </font>
+                        <style>
+                            -fx-text-fill: #34495e;
+                        </style>
+                    </Label>
+                    <TextField fx:id="userIdField" prefWidth="300.0" prefHeight="45.0"
+                               promptText="Enter your user ID"
+                               style="-fx-background-color: #f8f9fa;
+                                      -fx-border-color: #e1e8ed;
+                                      -fx-border-width: 2;
+                                      -fx-border-radius: 10;
+                                      -fx-background-radius: 10;
+                                      -fx-font-size: 14px;
+                                      -fx-padding: 0 15 0 15;
+                                      -fx-prompt-text-fill: #95a5a6;" />
+                </VBox>
+
+                <!-- Password Field -->
+                <VBox spacing="8.0">
+                    <Label text="Password:">
+                        <font>
+                            <Font name="System Bold" size="12.0" />
+                        </font>
+                        <style>
+                            -fx-text-fill: #34495e;
+                        </style>
+                    </Label>
+                    <PasswordField fx:id="passwordField" prefWidth="300.0" prefHeight="45.0"
+                                   promptText="Enter your password"
+                                   style="-fx-background-color: #f8f9fa;
+                                          -fx-border-color: #e1e8ed;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-font-size: 14px;
+                                          -fx-padding: 0 15 0 15;
+                                          -fx-prompt-text-fill: #95a5a6;" />
+                </VBox>
+
+                <!-- Login Button -->
+                <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLogin"
+                        prefWidth="300.0" prefHeight="50.0" text="Sign In"
+                        style="-fx-background-color: linear-gradient(to right, #667eea, #764ba2);
+                               -fx-text-fill: white;
+                               -fx-font-size: 16px;
+                               -fx-font-weight: bold;
+                               -fx-background-radius: 12;
+                               -fx-border-radius: 12;
+                               -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 10, 0, 0, 5);">
+                    <font>
+                        <Font name="System Bold" size="16.0" />
+                    </font>
+                </Button>
+
+                <!-- Error Message -->
+                <Label fx:id="errorLabel" textFill="#e74c3c" wrapText="true" prefWidth="300.0"
+                       style="-fx-font-size: 12px; -fx-padding: 5 0 0 0;" />
+
+            </VBox>
+
+            <!-- Footer Section -->
+            <VBox alignment="CENTER" spacing="10.0">
+                <Region prefHeight="10.0" />
+                <Label text="─────── or ───────">
+                    <style>
+                        -fx-text-fill: #bdc3c7;
+                        -fx-font-size: 12px;
+                    </style>
+                </Label>
+                <Hyperlink onAction="#handleSignupLink" text="Don't have an account? Create one"
+                           style="-fx-text-fill: #667eea;
+                                  -fx-font-size: 14px;
+                                  -fx-font-weight: bold;
+                                  -fx-underline: false;" />
+            </VBox>
+
+        </children>
+    </VBox>
+</StackPane>

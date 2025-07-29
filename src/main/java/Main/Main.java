@@ -100,7 +100,7 @@ public class Main extends Application {
         Parent root = loader.load();
 
         primaryStage.setTitle("Library Management System");
-        primaryStage.setScene(new Scene(root, 800, 600));
+        primaryStage.setScene(new Scene(root, 1200, 800));
         primaryStage.setResizable(false);
         primaryStage.show();
     }
