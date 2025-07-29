@@ -69,11 +69,7 @@ public class AuthorController implements Initializable {
         loadData();
     }
 
-    /**
-     * Helper method to manage which view is currently visible.
-     * It hides all views and then shows only the one passed as an argument.
-     * @param visibleView The VBox to make visible.
-     */
+    
     private void setViewVisibility(VBox visibleView) {
         // Hide all views
         initialView.setVisible(false);
@@ -90,44 +86,33 @@ public class AuthorController implements Initializable {
         }
     }
 
-    /**
-     * Sets the view to the initial menu.
-     */
+    
     private void showInitialView() {
         setViewVisibility(initialView);
     }
 
-    /**
-     * Event handler for the "My Published Books" button.
-     * Shows the view with the table of published books.
-     */
+    
     @FXML
     void showMyBooks(ActionEvent event) {
         setViewVisibility(publishedBooksView);
     }
 
-    /**
-     * Event handler for the "Request to Publish a Book" button.
-     * Shows the form for submitting a new book.
-     */
+    
     @FXML
     void showPublishRequest(ActionEvent event) {
         setViewVisibility(requestBookView);
     }
 
-    /**
-     * Event handler for the "Back" button in the sub-views.
-     * Returns the user to the initial menu.
-     */
+    
     @FXML
     void goBack(ActionEvent event) {
-        // Clear any previous messages when going back
+        
         publishMessageLabel.setText("");
         removeMessageLabel.setText("");
         showInitialView();
     }
 
-    // --- The rest of your methods remain largely the same ---
+    
 
     private void setupTable() {
         bookTitleCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
