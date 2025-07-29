@@ -58,6 +58,9 @@ public class ReadThreadClient implements Runnable {
                         System.out.println("INFO: AuthorController is null - no real-time update needed (probably initial login)");
                     }
                 }
+                if(obj instanceof String){
+                    Main.recieveUserID = (String)obj;
+                }
 
                 if (obj instanceof LibrarianPackage) {
                     System.out.println("=== LibrarianPackage received from server ===");

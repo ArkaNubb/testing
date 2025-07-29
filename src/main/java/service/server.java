@@ -26,8 +26,7 @@ public class server {
     public static Map<String, SocketWrapper> clientMap = new ConcurrentHashMap<>();
 
     server() {
-        // --- IMPORTANT: DO NOT re-initialize the static map here ---
-        // clientMap = new HashMap<>(); // REMOVE THIS LINE
+
         try {
             serverSocket = new ServerSocket(44444);
             System.out.println("Server started. Waiting for clients...");
@@ -44,15 +43,10 @@ public class server {
 
     public void serve(Socket clientSocket) throws IOException, ClassNotFoundException {
         SocketWrapper socketWrapper = new SocketWrapper(clientSocket);
-//        String clientName = (String) socketWrapper.read();
-//        clientMap.put(clientName, socketWrapper);
         new ReadThreadServer(socketWrapper);
-//        new WriteThreadServer(socketWrapper, null, null);
     }
 
     public static void main(String args[]) throws IOException {
-        // Static services to be accessible from all UI controllers
-
         // reading from file;
         BufferedReader bookInformation = new BufferedReader(new FileReader("src/main/java/service/bookInformation.txt"));
         BufferedReader authorInformation = new BufferedReader(new FileReader("src/main/java/service/authorInformation.txt"));

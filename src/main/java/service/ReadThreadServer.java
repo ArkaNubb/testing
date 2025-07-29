@@ -131,6 +131,20 @@ public class ReadThreadServer implements Runnable {
                     LogoutRequest logoutRequest = (LogoutRequest) obj;
                     server.clientMap.remove(logoutRequest.getUserId());
                 }
+                if(obj instanceof Member){
+                    String userId = server.memberService.generateMemberUserId();
+                    Member member = (Member)obj;
+                    member.setUserId(userId);
+                    server.memberService.addMember(member);
+                    socketWrapper.write(userId);
+                }
+                if(obj instanceof Author){
+                    String userId = server.authorService.genetateAuthorId();
+                    Author author = (Author)obj;
+                    author.setUserId(userId);
+                    server.authorService.addAuthor((Author)obj);
+                    socketWrapper.write(userId);
+                }
             }
         } catch (Exception e) {
             System.out.println("A client has disconnected.");

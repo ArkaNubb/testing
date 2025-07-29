@@ -3,19 +3,19 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Main.AuthorController">
     <top>
+        <!-- The top bar with Welcome label and Logout button remains the same -->
         <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="10" style="-fx-background-color: #37474F; -fx-border-color: #263238; -fx-border-width: 0 0 2 0;">
             <padding>
                 <Insets left="20" right="20" />
@@ -30,59 +30,74 @@
         </HBox>
     </top>
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE">
-            <tabs>
-                <Tab text="My Published Books">
-                    <content>
-                        <VBox spacing="10">
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                            </padding>
-                            <children>
-                                <TableView fx:id="myBooksTable" VBox.vgrow="ALWAYS">
-                                    <columns>
-                                        <TableColumn fx:id="bookTitleCol" prefWidth="300.0" text="Title" />
-                                        <TableColumn fx:id="bookIdCol" prefWidth="100.0" text="Book ID" />
-                                        <TableColumn fx:id="bookDateCol" prefWidth="120.0" text="Published Date" />
-                                        <TableColumn fx:id="bookRatingCol" prefWidth="100.0" text="Avg. Rating" />
-                                    </columns>
-                                    <columnResizePolicy>
-                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                    </columnResizePolicy>
-                                </TableView>
-                                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                    <children>
-                                        <Button onAction="#handleRemoveBook" text="Remove Selected Book" style="-fx-background-color: #E91E63; -fx-text-fill: white;" />
-                                        <Label fx:id="removeMessageLabel" textFill="RED" />
-                                    </children>
-                                </HBox>
-                            </children>
-                        </VBox>
-                    </content>
-                </Tab>
-                <Tab text="Publish New Book">
-                    <content>
-                        <VBox spacing="10">
-                            <padding>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                            </padding>
-                            <children>
-                                <Label text="Request to Publish a New Book">
-                                    <font>
-                                        <Font name="System Bold" size="14.0" />
-                                    </font>
-                                </Label>
-                                <TextField fx:id="titleField" promptText="Book Title" />
-                                <TextField fx:id="dateField" promptText="Published Date (dd-mm-yyyy)" />
-                                <TextField fx:id="genresField" promptText="Genres (comma-separated)" />
-                                <TextField fx:id="copiesField" promptText="Total Copies" />
-                                <Button onAction="#handlePublishRequest" text="Send Publish Request" style="-fx-background-color: #FF9800; -fx-text-fill: white;" />
-                                <Label fx:id="publishMessageLabel" />
-                            </children>
-                        </VBox>
-                    </content>
-                </Tab>
-            </tabs>
-        </TabPane>
+        <!-- A StackPane is used to layer the different views on top of each other -->
+        <StackPane fx:id="mainContentArea" alignment="CENTER">
+
+            <!-- View 1: Initial menu with two main buttons -->
+            <VBox fx:id="initialView" alignment="CENTER" spacing="30" maxWidth="400">
+                <children>
+                    <Button onAction="#showMyBooks" text="My Published Books" prefWidth="250" prefHeight="50" style="-fx-font-size: 16px; -fx-background-color: #007BFF; -fx-text-fill: white;"/>
+                    <Button onAction="#showPublishRequest" text="Request to Publish a Book" prefWidth="250" prefHeight="50" style="-fx-font-size: 16px; -fx-background-color: #FF9800; -fx-text-fill: white;"/>
+                </children>
+            </VBox>
+
+            <!-- View 2: "My Published Books" view. Initially hidden. -->
+            <VBox fx:id="publishedBooksView" spacing="10" visible="false" managed="false">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                </padding>
+                <children>
+                    <Label text="My Published Books">
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <TableView fx:id="myBooksTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="bookTitleCol" prefWidth="300.0" text="Title" />
+                            <TableColumn fx:id="bookIdCol" prefWidth="100.0" text="Book ID" />
+                            <TableColumn fx:id="bookDateCol" prefWidth="120.0" text="Published Date" />
+                            <TableColumn fx:id="bookRatingCol" prefWidth="100.0" text="Avg. Rating" />
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                        </columnResizePolicy>
+                    </TableView>
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <children>
+                            <Button onAction="#handleRemoveBook" text="Remove Selected Book" style="-fx-background-color: #E91E63; -fx-text-fill: white;" />
+                            <Label fx:id="removeMessageLabel" textFill="RED" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <!-- Back button to return to the initial menu -->
+                            <Button onAction="#goBack" text="Back" style="-fx-background-color: #607D8B; -fx-text-fill: white;" />
+                        </children>
+                    </HBox>
+                </children>
+            </VBox>
+
+            <!-- View 3: "Request to Publish" view. Initially hidden. -->
+            <VBox fx:id="requestBookView" spacing="15" visible="false" managed="false" maxWidth="500">
+                <padding>
+                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                </padding>
+                <children>
+                    <Label text="Request to Publish a New Book">
+                        <font>
+                            <Font name="System Bold" size="16.0" />
+                        </font>
+                    </Label>
+                    <TextField fx:id="titleField" promptText="Book Title" />
+                    <TextField fx:id="dateField" promptText="Published Date (dd-mm-yyyy)" />
+                    <TextField fx:id="genresField" promptText="Genres (comma-separated)" />
+                    <TextField fx:id="copiesField" promptText="Total Copies" />
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Button onAction="#handlePublishRequest" text="Send Publish Request" style="-fx-background-color: #FF9800; -fx-text-fill: white;" />
+                        <Label fx:id="publishMessageLabel" />
+                    </HBox>
+                    <HBox alignment="BOTTOM_RIGHT">
+                        <!-- Back button to return to the initial menu -->
+                        <Button onAction="#goBack" text="Back" style="-fx-background-color: #607D8B; -fx-text-fill: white;" />
+                    </HBox>
+                </children>
+            </VBox>
+        </StackPane>
     </center>
 </BorderPane>

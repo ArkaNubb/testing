@@ -1,6 +1,6 @@
 george.rr.martin@bookmail.com|700001|George123|George RR Martin|dummybook
-harper.lee@bookmail.com|700002|Harper123|Harper Lee|
-george.orwell@bookmail.com|700003|George123|George Orwell|dummybook,20002
+harper.lee@bookmail.com|700002|Harper123|Harper Lee|dummybook
+george.orwell@bookmail.com|700003|George123|George Orwell|dummybook
 jane.austen@bookmail.com|700004|Jane123|Jane Austen|dummybook,20003
 f.scott.fitzgerald@bookmail.com|700005|F123|F. Scott Fitzgerald|dummybook,20004
 jk.rowling@bookmail.com|700006|Jk123|J.K. Rowling|dummybook,20005

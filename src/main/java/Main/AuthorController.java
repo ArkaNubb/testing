@@ -19,7 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import service.server;
+import javafx.scene.layout.VBox; // Import VBox for view management
 
 import java.io.IOException;
 import java.net.URL;
@@ -34,20 +34,25 @@ public class AuthorController implements Initializable {
     private Author currentAuthor;
     private final ObservableList<Book> myBooksData = FXCollections.observableArrayList();
 
+    // FXML fields from the original file
     @FXML private Label welcomeLabel;
     @FXML private Label publishMessageLabel;
     @FXML private Label removeMessageLabel;
-
     @FXML private TableView<Book> myBooksTable;
     @FXML private TableColumn<Book, String> bookTitleCol;
     @FXML private TableColumn<Book, String> bookIdCol;
     @FXML private TableColumn<Book, String> bookDateCol;
     @FXML private TableColumn<Book, Number> bookRatingCol;
-
     @FXML private TextField titleField;
     @FXML private TextField dateField;
     @FXML private TextField genresField;
     @FXML private TextField copiesField;
+
+    // New FXML fields for the different views (panes)
+    @FXML private VBox initialView;
+    @FXML private VBox publishedBooksView;
+    @FXML private VBox requestBookView;
+
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -57,9 +62,72 @@ public class AuthorController implements Initializable {
         }
         setupTable();
 
+        // Ensure the initial menu is showing when the scene loads
+        showInitialView();
+
         Main.setAuthorController(this);
         loadData();
     }
+
+    /**
+     * Helper method to manage which view is currently visible.
+     * It hides all views and then shows only the one passed as an argument.
+     * @param visibleView The VBox to make visible.
+     */
+    private void setViewVisibility(VBox visibleView) {
+        // Hide all views
+        initialView.setVisible(false);
+        initialView.setManaged(false);
+        publishedBooksView.setVisible(false);
+        publishedBooksView.setManaged(false);
+        requestBookView.setVisible(false);
+        requestBookView.setManaged(false);
+
+        // Show and manage the selected view
+        if (visibleView != null) {
+            visibleView.setVisible(true);
+            visibleView.setManaged(true);
+        }
+    }
+
+    /**
+     * Sets the view to the initial menu.
+     */
+    private void showInitialView() {
+        setViewVisibility(initialView);
+    }
+
+    /**
+     * Event handler for the "My Published Books" button.
+     * Shows the view with the table of published books.
+     */
+    @FXML
+    void showMyBooks(ActionEvent event) {
+        setViewVisibility(publishedBooksView);
+    }
+
+    /**
+     * Event handler for the "Request to Publish a Book" button.
+     * Shows the form for submitting a new book.
+     */
+    @FXML
+    void showPublishRequest(ActionEvent event) {
+        setViewVisibility(requestBookView);
+    }
+
+    /**
+     * Event handler for the "Back" button in the sub-views.
+     * Returns the user to the initial menu.
+     */
+    @FXML
+    void goBack(ActionEvent event) {
+        // Clear any previous messages when going back
+        publishMessageLabel.setText("");
+        removeMessageLabel.setText("");
+        showInitialView();
+    }
+
+    // --- The rest of your methods remain largely the same ---
 
     private void setupTable() {
         bookTitleCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
@@ -87,7 +155,6 @@ public class AuthorController implements Initializable {
         });
     }
 
-    // --- UPDATED METHOD ---
     @FXML
     void handlePublishRequest(ActionEvent event) {
         String title = titleField.getText();
@@ -110,12 +177,8 @@ public class AuthorController implements Initializable {
             List<String> genres = new ArrayList<>(Arrays.asList(genresStr.split(",")));
             genres.replaceAll(String::trim);
 
-            // CORRECTED: Do NOT generate the Book ID on the client.
-            // The server will do this.
-
             SocketWrapper socketWrapper = Main.getSocketWrapper();
             if (socketWrapper != null) {
-                // Use the new constructor that doesn't require a bookId
                 AuthorRequest publishRequest = new AuthorRequest(
                         currentAuthor.getUserId(),
                         title,
@@ -125,7 +188,7 @@ public class AuthorController implements Initializable {
                 );
 
                 socketWrapper.write(publishRequest);
-                publishMessageLabel.setText("Publish request sent for '" + title + "'. Awaiting librarian approval.");
+                publishMessageLabel.setText("Publish request sent. Awaiting approval.");
 
                 titleField.clear();
                 dateField.clear();
@@ -136,9 +199,9 @@ public class AuthorController implements Initializable {
             }
 
         } catch (NumberFormatException e) {
-            publishMessageLabel.setText("Invalid number for copies. Please enter a valid number.");
+            publishMessageLabel.setText("Invalid number for copies.");
         } catch (IOException e) {
-            publishMessageLabel.setText("Error sending publish request to server.");
+            publishMessageLabel.setText("Error sending publish request.");
             e.printStackTrace();
         }
     }
@@ -156,7 +219,7 @@ public class AuthorController implements Initializable {
         Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmationAlert.setTitle("Confirm Removal");
         confirmationAlert.setHeaderText("Remove '" + selectedBook.getName() + "'?");
-        confirmationAlert.setContentText("Are you sure you want to permanently remove this book from the library system?");
+        confirmationAlert.setContentText("Are you sure you want to permanently remove this book?");
 
         Optional<ButtonType> result = confirmationAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -180,12 +243,6 @@ public class AuthorController implements Initializable {
                 e.printStackTrace();
             }
         }
-    }
-
-    @FXML
-    void handleRefresh(ActionEvent event) {
-        System.out.println("Manual refresh triggered for author");
-        loadData();
     }
 
     @FXML
