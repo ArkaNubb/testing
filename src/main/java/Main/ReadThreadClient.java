@@ -1,5 +1,6 @@
 package Main;
 
+import common.AuthorPackage;
 import common.LibrarianPackage;
 import common.MemberPackage;
 import common.SocketWrapper;
@@ -26,21 +27,6 @@ public class ReadThreadClient implements Runnable {
                     System.out.println("=== MemberPackage received from server ===");
                     MemberPackage pkgg = (MemberPackage) obj;
 
-                    // Debug the package contents
-                    int allBooksCount = 0;
-                    int borrowedBooksCount = 0;
-
-                    if (pkgg.getAllBooks() != null) {
-                        allBooksCount = pkgg.getAllBooks().size();
-                    }
-
-                    if (pkgg.getMember() != null && pkgg.getMember().getBorrowedBooks() != null) {
-                        borrowedBooksCount = pkgg.getMember().getBorrowedBooks().size();
-                    }
-
-                    System.out.println("Package contains - All Books: " + allBooksCount +
-                            ", Borrowed Books: " + borrowedBooksCount);
-
                     Main.setMemberPackage(pkgg);
 
                     // Trigger UI update on JavaFX Application Thread
@@ -54,6 +40,25 @@ public class ReadThreadClient implements Runnable {
                         System.out.println("INFO: MemberController is null - no real-time update needed (probably initial login)");
                     }
                 }
+
+                if (obj instanceof AuthorPackage) {
+                    System.out.println("=== AuthorPackage received from server ===");
+                    AuthorPackage pkgg = (AuthorPackage) obj;
+
+                    Main.setAuthorPackage(pkgg);
+
+                    // Trigger UI update on JavaFX Application Thread
+                    AuthorController authorController = Main.getAuthorController();
+                    if (authorController != null) {
+                        System.out.println("Triggering real-time Author UI update...");
+                        Platform.runLater(() -> {
+                            authorController.loadData();
+                        });
+                    } else {
+                        System.out.println("INFO: AuthorController is null - no real-time update needed (probably initial login)");
+                    }
+                }
+
                 if (obj instanceof LibrarianPackage) {
                     System.out.println("=== LibrarianPackage received from server ===");
                     LibrarianPackage pkg = (LibrarianPackage) obj;

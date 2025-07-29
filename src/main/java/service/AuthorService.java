@@ -16,10 +16,21 @@ public class AuthorService {
     protected static List<Author>allAuthors;
     Author author;
     public AuthorService(List<Author> allAuthors){
-        this.allAuthors = allAuthors;
+        AuthorService.allAuthors = allAuthors;
     }
     public AuthorService(Author author){
         this.author = author;
+    }
+
+    public static Author getAuthor(String userId) {
+        for(var x: allAuthors){
+            if(x.getUserId().equals(userId)) return x;
+        }
+        return null;
+    }
+
+    public static List<Author> getAuthors() {
+        return allAuthors;
     }
 
     public static Author isAuthorFound(String userId){

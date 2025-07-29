@@ -1,5 +1,6 @@
 package Main;
 
+import common.AuthorPackage;
 import common.LibrarianPackage;
 import common.MemberPackage;
 import common.SocketWrapper;
@@ -15,10 +16,27 @@ public class Main extends Application {
     public static SocketWrapper socketWrapper;
     private static MemberPackage memberPackage;
     public static LibrarianPackage librarianPackage;
+    public static AuthorPackage authorPackage;
 
-    // --- MODIFICATION 1: Add a static reference for the LibrarianController ---
+    public static AuthorPackage getAuthorPackage() {
+        return authorPackage;
+    }
+
+    public static void setAuthorPackage(AuthorPackage authorPackage) {
+        Main.authorPackage = authorPackage;
+    }
+
     private static LibrarianController librarianController;
     private static MemberController memberController;
+    private static AuthorController authorController;
+
+    public static AuthorController getAuthorController() {
+        return authorController;
+    }
+
+    public static void setAuthorController(AuthorController controller) {
+        Main.authorController = controller;
+    }
 
     public static void setMemberPackage(MemberPackage memberPackage) {
         Main.memberPackage = memberPackage;
@@ -36,7 +54,6 @@ public class Main extends Application {
         Main.librarianPackage = librarianPackage;
     }
 
-    // --- MODIFICATION 2: Add getter and setter for the controller ---
     public static LibrarianController getLibrarianController() {
         return librarianController;
     }
