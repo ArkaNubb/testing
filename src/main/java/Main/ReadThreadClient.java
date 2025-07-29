@@ -37,12 +37,12 @@ public class ReadThreadClient implements Runnable {
                             controllerr.loadData();
                         });
                     } else {
-                        System.out.println("INFO: MemberController is null - no real-time update needed (probably initial login)");
+                        System.out.println("MemberController is null");
                     }
                 }
 
                 if (obj instanceof AuthorPackage) {
-                    System.out.println("=== AuthorPackage received from server ===");
+                    System.out.println("AuthorPackage received from server");
                     AuthorPackage pkgg = (AuthorPackage) obj;
 
                     Main.setAuthorPackage(pkgg);
@@ -50,12 +50,12 @@ public class ReadThreadClient implements Runnable {
                     // Trigger UI update on JavaFX Application Thread
                     AuthorController authorController = Main.getAuthorController();
                     if (authorController != null) {
-                        System.out.println("Triggering real-time Author UI update...");
+                        System.out.println("Author UI updating...");
                         Platform.runLater(() -> {
                             authorController.loadData();
                         });
                     } else {
-                        System.out.println("INFO: AuthorController is null - no real-time update needed (probably initial login)");
+                        System.out.println("AuthorController is null");
                     }
                 }
                 if(obj instanceof String){
@@ -63,36 +63,8 @@ public class ReadThreadClient implements Runnable {
                 }
 
                 if (obj instanceof LibrarianPackage) {
-                    System.out.println("=== LibrarianPackage received from server ===");
+                    System.out.println("LibrarianPackage received from server");
                     LibrarianPackage pkg = (LibrarianPackage) obj;
-
-                    // Debug the package contents
-                    int issueCount = 0;
-                    int returnCount = 0;
-                    int publishCount = 0;
-
-                    if (pkg.pendingIssuingBook != null) {
-                        for (var entry : pkg.pendingIssuingBook.entrySet()) {
-                            issueCount += entry.getValue().size();
-                        }
-                    }
-
-                    if (pkg.pendingReturnedBook != null) {
-                        for (var entry : pkg.pendingReturnedBook.entrySet()) {
-                            returnCount += entry.getValue().size();
-                        }
-                    }
-
-                    if (pkg.pendingPublishRequests != null) {
-                        for (var entry : pkg.pendingPublishRequests.entrySet()) {
-                            publishCount += entry.getValue().size();
-                        }
-                    }
-
-                    System.out.println("Package contains - Issues: " + issueCount +
-                            ", Returns: " + returnCount +
-                            ", Publishes: " + publishCount);
-
                     Main.setLibrarianPackage(pkg);
 
                     // Trigger UI update on JavaFX Application Thread
@@ -103,7 +75,7 @@ public class ReadThreadClient implements Runnable {
                             controller.loadData();
                         });
                     } else {
-                        System.out.println("WARNING: LibrarianController is null - cannot update UI!");
+                        System.out.println("LibrarianController is null - cannot update UI");
                     }
                 }
 

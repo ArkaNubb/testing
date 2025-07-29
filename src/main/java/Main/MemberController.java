@@ -77,11 +77,11 @@ public class MemberController implements Initializable {
 
     public void loadData() {
         Platform.runLater(() -> {
-            System.out.println("=== Refreshing Member UI ===");
+            System.out.println("Refreshing Member UI");
 
             MemberPackage memberPackage = Main.getMemberPackage();
             if (memberPackage == null) {
-                System.out.println("ERROR: Member package is null. Cannot load data.");
+                System.out.println("Member package is null. Cannot load data");
                 return;
             }
 
