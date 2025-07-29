@@ -8,6 +8,10 @@ public abstract class user implements Serializable {
     protected String password;
     protected String name;
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public user(String email, String userId, String password, String name) {
         this.email = email;
         this.userId = userId;

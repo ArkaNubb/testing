@@ -18,6 +18,7 @@ public class Main extends Application {
     public static LibrarianPackage librarianPackage;
     public static AuthorPackage authorPackage;
 
+    public static String recieveUserID;
     public static AuthorPackage getAuthorPackage() {
         return authorPackage;
     }

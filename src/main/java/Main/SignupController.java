@@ -1,5 +1,6 @@
 package Main;
 
+import common.SocketWrapper;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import common.Member;
 import common.UserRole;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 
 public class SignupController {
@@ -36,7 +38,7 @@ public class SignupController {
         String email = emailField.getText();
         String password = passwordField.getText();
         UserRole role = roleChoiceBox.getValue();
-
+        SocketWrapper socketWrapper;
         if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             messageLabel.setText("All fields are required.");
             messageLabel.setStyle("-fx-text-fill: red;");
@@ -45,22 +47,42 @@ public class SignupController {
 
         try {
             if (role == UserRole.MEMBER) {
-                String userId = server.memberService.generateMemberUserId();
-                Member member = new Member(email, userId, password, name, new ArrayList<>());
-                server.memberService.addMember(member);
-                messageLabel.setText("Member account created! Your User ID is: " + userId);
+                Member member = new Member(email, "-1", password, name, new ArrayList<>());
+//                server.memberService.addMember(member);
+                socketWrapper = Main.getSocketWrapper();
+                socketWrapper.write(member);
+
+                for (int i = 0; i < 100; i++) {
+                    if (Main.recieveUserID != null) {
+                        break;
+                    }
+                    Thread.sleep(50); // Pause briefly to allow the reader thread to work
+                }
+
+                messageLabel.setText("Member account created! Your User ID is: " + Main.recieveUserID);
                 messageLabel.setStyle("-fx-text-fill: green;");
             } else if (role == UserRole.AUTHOR) {
-                String userId = server.authorService.genetateAuthorId();
-                Author author = new Author(email, userId, password, name, new ArrayList<>());
-                server.authorService.addAuthor(author);
-                messageLabel.setText("Author account created! Your User ID is: " + userId);
+                Author author = new Author(email, "-1", password, name, new ArrayList<>());
+//                server.authorService.addAuthor(author);
+                socketWrapper = Main.getSocketWrapper();
+                socketWrapper.write(author);
+
+                for (int i = 0; i < 100; i++) {
+                    if (Main.recieveUserID != null) {
+                        break;
+                    }
+                    Thread.sleep(50); // Pause briefly to allow the reader thread to work
+                }
+
+                messageLabel.setText("Author account created! Your User ID is: " + Main.recieveUserID);
                 messageLabel.setStyle("-fx-text-fill: green;");
             }
         } catch (IOException e) {
             messageLabel.setText("Error saving user data: " + e.getMessage());
             messageLabel.setStyle("-fx-text-fill: red;");
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
